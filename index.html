@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#4338CA" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>ml-lab · the foundational machine-learning pipeline, visualised</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+            onload="renderMathInElement(document.body, { delimiters: [{left:'$$', right:'$$', display:true},{left:'$', right:'$', display:false}], ignoredTags: ['option','script','textarea'] })"></script>
+
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="title">
+        <span class="dot"></span><strong>ml-lab</strong>
+        <span class="sub">pipeline · gradient descent · evaluation · core algorithms</span>
+      </div>
+      <nav>
+        <a href="#split">train/test</a>
+        <a href="#gd">gradient descent</a>
+        <a href="#bv">bias–variance</a>
+        <a href="#scale">scaling</a>
+        <a href="#knn">k-NN</a>
+        <a href="#logit">logistic</a>
+        <a href="#tree">decision tree</a>
+        <a href="#kmeans">k-means</a>
+        <a href="#pca">PCA</a>
+        <a href="#cm">confusion</a>
+        <a href="#roc">ROC/AUC</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- 1. TRAIN/TEST SPLIT & OVERFITTING ---------------------------- -->
+      <section class="demo" id="split">
+        <h2>1. Train/test split &amp; overfitting</h2>
+        <p class="cap">Fit a polynomial of degree $d$ to noisy training points, then measure error on a held-out
+          test set. Low degree under-fits; high degree chases the noise and the <em>test</em> error rises even as
+          <em>training</em> error keeps falling — the signature of overfitting.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-split" width="600" height="340"></canvas></div>
+          <div class="ctrls">
+            <label>polynomial degree $d$ <span class="mono" id="sp-dv">3</span>
+              <input id="sp-d" type="range" min="1" max="12" step="1" value="3"/></label>
+            <label>noise $\sigma$ <span class="mono" id="sp-nv">0.25</span>
+              <input id="sp-n" type="range" min="0" max="80" step="1" value="25"/></label>
+            <label>train fraction <span class="mono" id="sp-fv">0.60</span>
+              <input id="sp-f" type="range" min="20" max="80" step="5" value="60"/></label>
+            <div class="readout"><span>train RMSE</span><strong id="sp-tr" class="mono">—</strong></div>
+            <div class="readout"><span>test RMSE</span><strong id="sp-te" class="mono big">—</strong></div>
+            <div class="readout"><span>verdict</span><strong id="sp-v" class="mono">—</strong></div>
+            <button id="sp-new" class="btn">new sample</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. GRADIENT DESCENT ----------------------------------------- -->
+      <section class="demo" id="gd">
+        <h2>2. Gradient descent — linear regression</h2>
+        <p class="cap">Minimise the mean-squared-error loss $J(w,b)=\frac1m\sum_i (w x_i+b-y_i)^2$ by stepping
+          downhill: $w \leftarrow w-\eta\,\partial J/\partial w$. Watch the line settle onto the data and the loss
+          decay. Too large a learning rate $\eta$ diverges.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-gd" width="600" height="340"></canvas></div>
+          <div class="ctrls">
+            <label>learning rate $\eta$ <span class="mono" id="gd-lv">0.05</span>
+              <input id="gd-l" type="range" min="1" max="120" step="1" value="50"/></label>
+            <div class="readout"><span>iteration</span><strong id="gd-it" class="mono">0</strong></div>
+            <div class="readout"><span>$w,\,b$</span><strong id="gd-wb" class="mono">—</strong></div>
+            <div class="readout"><span>MSE loss</span><strong id="gd-loss" class="mono big">—</strong></div>
+            <button id="gd-play" class="btn">play</button>
+            <button id="gd-step" class="btn">step</button>
+            <button id="gd-reset" class="btn">reset</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. BIAS–VARIANCE -------------------------------------------- -->
+      <section class="demo" id="bv">
+        <h2>3. Bias–variance tradeoff</h2>
+        <p class="cap">Expected test error decomposes as $\text{bias}^2+\text{variance}+\text{irreducible noise}$.
+          As model complexity grows, bias falls but variance climbs. The sweet spot minimises their sum.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-bv" width="600" height="320"></canvas></div>
+          <div class="ctrls">
+            <label>complexity <span class="mono" id="bv-cv">5</span>
+              <input id="bv-c" type="range" min="1" max="20" step="1" value="5"/></label>
+            <label>noise floor <span class="mono" id="bv-nv">0.15</span>
+              <input id="bv-n" type="range" min="0" max="40" step="1" value="15"/></label>
+            <div class="readout"><span>bias²</span><strong id="bv-bias" class="mono">—</strong></div>
+            <div class="readout"><span>variance</span><strong id="bv-var" class="mono">—</strong></div>
+            <div class="readout"><span>total error</span><strong id="bv-tot" class="mono big">—</strong></div>
+            <div class="readout"><span>optimum at</span><strong id="bv-opt" class="mono">—</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. FEATURE SCALING ------------------------------------------ -->
+      <section class="demo" id="scale">
+        <h2>4. Feature scaling &amp; standardisation</h2>
+        <p class="cap">Many algorithms assume comparable feature ranges. Standardisation
+          $z=(x-\mu)/\sigma$ centres and unit-scales each axis; min–max maps to $[0,1]$. See the raw cloud
+          transform and read the new statistics.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-scale" width="600" height="320"></canvas></div>
+          <div class="ctrls">
+            <label>method
+              <select id="sc-m">
+                <option value="none" selected>raw (none)</option>
+                <option value="standard">standardise (z-score)</option>
+                <option value="minmax">min–max [0,1]</option>
+              </select>
+            </label>
+            <div class="readout"><span>mean (x, y)</span><strong id="sc-mean" class="mono">—</strong></div>
+            <div class="readout"><span>std (x, y)</span><strong id="sc-std" class="mono">—</strong></div>
+            <div class="readout"><span>range x</span><strong id="sc-rx" class="mono">—</strong></div>
+            <div class="readout"><span>range y</span><strong id="sc-ry" class="mono">—</strong></div>
+            <button id="sc-new" class="btn">new cloud</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. k-NN ----------------------------------------------------- -->
+      <section class="demo" id="knn">
+        <h2>5. k-nearest neighbours</h2>
+        <p class="cap">A non-parametric classifier: a point is labelled by majority vote of its $k$ closest
+          neighbours. The shaded background is the decision region. Click to drop a query point; raise $k$ to
+          smooth the boundary.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-knn" width="600" height="340"></canvas></div>
+          <div class="ctrls">
+            <label>neighbours $k$ <span class="mono" id="kn-kv">5</span>
+              <input id="kn-k" type="range" min="1" max="21" step="2" value="5"/></label>
+            <div class="readout"><span>query class</span><strong id="kn-cls" class="mono big">—</strong></div>
+            <div class="readout"><span>votes</span><strong id="kn-votes" class="mono">—</strong></div>
+            <div class="readout"><span>train accuracy</span><strong id="kn-acc" class="mono">—</strong></div>
+            <button id="kn-new" class="btn">new data</button>
+            <p class="hint">Click the canvas to classify a new query point.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. LOGISTIC REGRESSION / PERCEPTRON ------------------------- -->
+      <section class="demo" id="logit">
+        <h2>6. Logistic regression — a linear classifier</h2>
+        <p class="cap">A perceptron-style model predicts $\hat p=\sigma(w_1x+w_2y+b)$ and learns by gradient
+          descent on cross-entropy loss. The line is the $\hat p=0.5$ decision boundary; the shading is the
+          predicted probability.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-logit" width="600" height="340"></canvas></div>
+          <div class="ctrls">
+            <label>learning rate $\eta$ <span class="mono" id="lg-lv">0.30</span>
+              <input id="lg-l" type="range" min="1" max="100" step="1" value="30"/></label>
+            <div class="readout"><span>epoch</span><strong id="lg-ep" class="mono">0</strong></div>
+            <div class="readout"><span>cross-entropy</span><strong id="lg-loss" class="mono big">—</strong></div>
+            <div class="readout"><span>accuracy</span><strong id="lg-acc" class="mono">—</strong></div>
+            <button id="lg-play" class="btn">play</button>
+            <button id="lg-step" class="btn">step</button>
+            <button id="lg-reset" class="btn">reset</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. DECISION TREE -------------------------------------------- -->
+      <section class="demo" id="tree">
+        <h2>7. Decision tree — recursive splitting</h2>
+        <p class="cap">A tree greedily picks the axis-aligned split that most reduces Gini impurity, recursing
+          until a depth limit. Deeper trees carve the plane into smaller, purer boxes — and start to overfit.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-tree" width="600" height="340"></canvas></div>
+          <div class="ctrls">
+            <label>max depth <span class="mono" id="tr-dv">3</span>
+              <input id="tr-d" type="range" min="1" max="7" step="1" value="3"/></label>
+            <div class="readout"><span>leaves</span><strong id="tr-leaf" class="mono">—</strong></div>
+            <div class="readout"><span>root Gini</span><strong id="tr-rg" class="mono">—</strong></div>
+            <div class="readout"><span>train accuracy</span><strong id="tr-acc" class="mono big">—</strong></div>
+            <button id="tr-new" class="btn">new data</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. k-MEANS -------------------------------------------------- -->
+      <section class="demo" id="kmeans">
+        <h2>8. k-means clustering</h2>
+        <p class="cap">Unsupervised: assign each point to its nearest centroid, then move each centroid to the
+          mean of its members. Repeat to convergence. Watch the inertia (within-cluster sum of squares) fall at
+          each step.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-km" width="600" height="340"></canvas></div>
+          <div class="ctrls">
+            <label>clusters $k$ <span class="mono" id="km-kv">3</span>
+              <input id="km-k" type="range" min="2" max="6" step="1" value="3"/></label>
+            <div class="readout"><span>iteration</span><strong id="km-it" class="mono">0</strong></div>
+            <div class="readout"><span>inertia (WCSS)</span><strong id="km-in" class="mono big">—</strong></div>
+            <div class="readout"><span>moved</span><strong id="km-mv" class="mono">—</strong></div>
+            <button id="km-play" class="btn">play</button>
+            <button id="km-step" class="btn">step</button>
+            <button id="km-reset" class="btn">reset</button>
+            <button id="km-new" class="btn">new data</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. PCA ------------------------------------------------------ -->
+      <section class="demo" id="pca">
+        <h2>9. Principal component analysis</h2>
+        <p class="cap">PCA finds the orthogonal directions of greatest variance. The first principal component
+          (drawn solid) is the eigenvector of the covariance matrix with the largest eigenvalue. Projecting onto
+          it is the best 1-D summary of the cloud.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-pca" width="600" height="340"></canvas></div>
+          <div class="ctrls">
+            <label>correlation <span class="mono" id="pc-rv">0.80</span>
+              <input id="pc-r" type="range" min="-95" max="95" step="5" value="80"/></label>
+            <label class="check"><input id="pc-proj" type="checkbox"/> show projection onto PC1</label>
+            <div class="readout"><span>$\lambda_1,\,\lambda_2$</span><strong id="pc-eig" class="mono">—</strong></div>
+            <div class="readout"><span>PC1 angle</span><strong id="pc-ang" class="mono">—</strong></div>
+            <div class="readout"><span>variance kept</span><strong id="pc-var" class="mono big">—</strong></div>
+            <button id="pc-new" class="btn">new cloud</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. CONFUSION MATRIX ---------------------------------------- -->
+      <section class="demo" id="cm">
+        <h2>10. Confusion matrix &amp; the threshold</h2>
+        <p class="cap">A binary classifier outputs scores; a threshold turns them into labels. Slide it to trade
+          false positives against false negatives, and read accuracy, precision, recall and $F_1$ live.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-cm" width="600" height="320"></canvas></div>
+          <div class="ctrls">
+            <label>threshold <span class="mono" id="cm-tv">0.50</span>
+              <input id="cm-t" type="range" min="0" max="100" step="1" value="50"/></label>
+            <div class="readout"><span>TP · FP · FN · TN</span><strong id="cm-cnt" class="mono">—</strong></div>
+            <div class="readout"><span>accuracy</span><strong id="cm-acc" class="mono">—</strong></div>
+            <div class="readout"><span>precision</span><strong id="cm-prec" class="mono">—</strong></div>
+            <div class="readout"><span>recall</span><strong id="cm-rec" class="mono">—</strong></div>
+            <div class="readout"><span>$F_1$ score</span><strong id="cm-f1" class="mono big">—</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. ROC / AUC ----------------------------------------------- -->
+      <section class="demo" id="roc">
+        <h2>11. ROC curve &amp; AUC</h2>
+        <p class="cap">Sweeping the threshold traces the receiver-operating-characteristic curve: true-positive
+          rate vs false-positive rate. The area under it (AUC) is the probability the model ranks a random
+          positive above a random negative. Better separation pushes the curve toward the top-left.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-roc" width="600" height="340"></canvas></div>
+          <div class="ctrls">
+            <label>class separation <span class="mono" id="rc-sv">1.5</span>
+              <input id="rc-s" type="range" min="0" max="40" step="1" value="15"/></label>
+            <label>threshold <span class="mono" id="rc-tv">0.50</span>
+              <input id="rc-t" type="range" min="0" max="100" step="1" value="50"/></label>
+            <div class="readout"><span>TPR (sensitivity)</span><strong id="rc-tpr" class="mono">—</strong></div>
+            <div class="readout"><span>FPR (1−specificity)</span><strong id="rc-fpr" class="mono">—</strong></div>
+            <div class="readout"><span>AUC</span><strong id="rc-auc" class="mono big">—</strong></div>
+            <button id="rc-new" class="btn">new scores</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>ml-lab — Andrea Montana · IE BCSAI</span>
+      <span class="more">
+        <a href="https://github.com/andreaisabelmontana/modeling-lab"  target="_blank">modeling-lab</a>
+        <a href="https://github.com/andreaisabelmontana/stats-lab" target="_blank">stats-lab</a>
+        <a href="https://github.com/andreaisabelmontana/linalg-lab" target="_blank">linalg-lab</a>
+        <a href="https://github.com/andreaisabelmontana/ml-lab" target="_blank">source</a>
+      </span>
+    </footer>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
