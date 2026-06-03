@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#4338CA" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>ml-lab · worked example — end-to-end churn prediction</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+            onload="renderMathInElement(document.body, { delimiters: [{left:'$$', right:'$$', display:true},{left:'$', right:'$', display:false}], ignoredTags: ['option','script','textarea'] })"></script>
+
+    <link rel="stylesheet" href="./style.css" />
+
+    <style>
+      /* project.html — scoped extras only (code blocks, figures, tables).
+         Reuses :root tokens from style.css; introduces no new palette. */
+      .lead { color: var(--ink-soft); font-size: 0.92rem; margin: 0 0 0.85rem; max-width: 72ch; }
+      .demo > p { color: var(--ink-soft); font-size: 0.88rem; max-width: 74ch; }
+      .demo h3 {
+        font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+        color: var(--ink); margin: 1.1rem 0 0.5rem;
+      }
+      .demo h3:first-of-type { margin-top: 0.4rem; }
+
+      /* meta grid (overview) */
+      .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; margin: 0.4rem 0 0.4rem; }
+      .meta .cell { border: 1px solid var(--rule); border-radius: 6px; padding: 0.55rem 0.7rem; background: var(--bg); }
+      .meta .cell .k { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+      .meta .cell .v { color: var(--ink); font-weight: 700; font-size: 0.9rem; margin-top: 0.15rem; }
+      .meta .cell .v.mono { font-family: var(--font-mono); }
+
+      /* code blocks */
+      pre {
+        margin: 0.6rem 0; padding: 0.85rem 1rem;
+        background: #1B1B22; color: #E7E7EC;
+        border: 1px solid var(--rule-h); border-radius: 8px;
+        overflow-x: auto; font-size: 0.8rem; line-height: 1.55;
+      }
+      pre code { font-family: var(--font-mono); }
+      .code-cap { color: var(--muted); font-size: 0.74rem; font-family: var(--font-mono); margin: 0.6rem 0 0; }
+      code.inline {
+        font-family: var(--font-mono); font-size: 0.85em;
+        background: var(--accent-soft); color: var(--accent);
+        padding: 0.05em 0.35em; border-radius: 3px;
+      }
+
+      /* tables */
+      table.tbl { width: 100%; border-collapse: collapse; margin: 0.6rem 0; font-size: 0.83rem; }
+      table.tbl th, table.tbl td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--rule); }
+      table.tbl th { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+      table.tbl td.mono, table.tbl th.mono { font-family: var(--font-mono); }
+      table.tbl tr td strong { color: var(--accent); }
+      table.tbl tbody tr:hover { background: var(--bg); }
+
+      /* confusion matrix grid */
+      .cmwrap { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: flex-start; margin: 0.5rem 0; }
+      .cm { display: grid; grid-template-columns: auto auto auto; gap: 4px; font-size: 0.8rem; }
+      .cm .lab { color: var(--muted); font-size: 0.72rem; display: flex; align-items: center; justify-content: center; padding: 0.3rem; text-align: center; }
+      .cm .box { border: 1px solid var(--rule-h); border-radius: 6px; padding: 0.7rem 0.9rem; min-width: 92px; text-align: center; background: var(--bg); }
+      .cm .box .n { font-family: var(--font-mono); font-weight: 700; font-size: 1.25rem; color: var(--ink); }
+      .cm .box .t { color: var(--muted); font-size: 0.7rem; margin-top: 0.15rem; }
+      .cm .box.tp, .cm .box.tn { background: rgba(22,163,74,0.10); border-color: var(--good); }
+      .cm .box.fp, .cm .box.fn { background: rgba(220,38,38,0.08); border-color: var(--bad); }
+      .cmnote { color: var(--ink-soft); font-size: 0.84rem; max-width: 40ch; }
+
+      /* steps list */
+      ol.steps { margin: 0.3rem 0 0; padding-left: 1.2rem; color: var(--ink-soft); font-size: 0.88rem; }
+      ol.steps li { margin-bottom: 0.35rem; }
+      ul.tight { margin: 0.3rem 0; padding-left: 1.2rem; color: var(--ink-soft); font-size: 0.88rem; }
+      ul.tight li { margin-bottom: 0.3rem; }
+
+      .tag { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent);
+             background: var(--accent-soft); border-radius: 4px; padding: 0.12em 0.5em; margin: 0 0.25em 0.25em 0; }
+      .xref { font-size: 0.82rem; color: var(--ink-soft); }
+      .xref a { font-weight: 500; }
+      .callout {
+        border: 1px solid var(--rule-h); border-left: 3px solid var(--accent);
+        border-radius: 6px; background: var(--bg); padding: 0.6rem 0.85rem; margin: 0.7rem 0;
+        font-size: 0.85rem; color: var(--ink-soft);
+      }
+      .callout strong { color: var(--ink); }
+      .refs { font-size: 0.83rem; color: var(--ink-soft); }
+      .refs li { margin-bottom: 0.4rem; }
+      .figcap { color: var(--muted); font-size: 0.76rem; margin: 0.3rem 0 0; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="title">
+        <span class="dot"></span><strong>ml-lab</strong>
+        <span class="sub">worked example · end-to-end supervised ML pipeline</span>
+      </div>
+      <nav>
+        <a href="./index.html">← interactive demos</a>
+        <a href="./course.html">course outline</a>
+        <a href="#overview">overview</a>
+        <a href="#data">dataset</a>
+        <a href="#pipeline">pipeline</a>
+        <a href="#impl">implementation</a>
+        <a href="#results">results</a>
+        <a href="#biasvar">bias–variance</a>
+        <a href="#outcomes">outcomes</a>
+        <a href="#extend">extensions</a>
+        <a href="./SYLLABUS.pdf" target="_blank">syllabus PDF</a>
+      </nav>
+    </header>
+
+    <main>
+
+      <!-- 1. OVERVIEW ----------------------------------------------------- -->
+      <section class="demo" id="overview">
+        <h2>Worked example — predicting customer churn end-to-end</h2>
+        <p class="lead">A single, complete supervised-learning project carried from raw data to an
+          evaluated, tuned classifier. We predict which telecom customers will <em>churn</em> (cancel
+          their subscription) — a canonical binary-classification business problem. Every step below is
+          real, runnable Python (<span class="mono">scikit-learn</span>, <span class="mono">pandas</span>,
+          <span class="mono">numpy</span>); the underlying mathematics is written out in KaTeX so the code
+          and the theory line up.</p>
+
+        <h3>Goal</h3>
+        <p>Given a customer's contract, billing and usage attributes, output a calibrated probability
+          $\hat p = P(\text{churn}=1 \mid \mathbf{x})$ and a class decision. The business cares more about
+          <em>recall on churners</em> (catching at-risk customers before they leave) than raw accuracy,
+          so we evaluate with the full confusion matrix, precision–recall and ROC-AUC rather than accuracy alone.</p>
+
+        <h3>Stack</h3>
+        <div class="meta">
+          <div class="cell"><div class="k">Language</div><div class="v mono">Python 3.11</div></div>
+          <div class="cell"><div class="k">Core libs</div><div class="v mono">scikit-learn · pandas · numpy</div></div>
+          <div class="cell"><div class="k">Task</div><div class="v">Binary classification</div></div>
+          <div class="cell"><div class="k">Models</div><div class="v">Baseline · Logistic · Tree · Random Forest</div></div>
+          <div class="cell"><div class="k">Validation</div><div class="v">Stratified 5-fold CV</div></div>
+          <div class="cell"><div class="k">Tuning</div><div class="v mono">GridSearchCV</div></div>
+        </div>
+
+        <h3>Sessions exercised</h3>
+        <p>This project deliberately threads together most of the course's first half. It maps onto the
+          syllabus as follows (see the <a href="./course.html#program">program</a>):</p>
+        <p>
+          <span class="tag">S3 · data prep</span>
+          <span class="tag">S4 · feature engineering</span>
+          <span class="tag">S5 · fundamental algorithms</span>
+          <span class="tag">S6 · supervised training</span>
+          <span class="tag">S7 · first end-to-end practice</span>
+          <span class="tag">S9 · imbalanced classes</span>
+          <span class="tag">S11 · pipelines &amp; hyper-tuning</span>
+          <span class="tag">S13 · model evaluation &amp; CV</span>
+          <span class="tag">S14 · performance metrics</span>
+        </p>
+        <p class="xref">It is the concrete companion to session 7's <em>“A First Basic Practice — end to end
+          practical case, from EDA to model training and validation”</em> and session 12's
+          <em>“A First Practical Overview of Typical Applications.”</em></p>
+      </section>
+
+      <!-- 2. DATASET & FRAMING ------------------------------------------- -->
+      <section class="demo" id="data">
+        <h2>1 · Dataset &amp; problem framing</h2>
+        <p>We use the well-known <strong>Telco Customer Churn</strong> table (7,043 rows, ~20 features):
+          a mix of categorical attributes (<span class="mono">Contract</span>,
+          <span class="mono">InternetService</span>, <span class="mono">PaymentMethod</span>, …) and
+          numeric ones (<span class="mono">tenure</span>, <span class="mono">MonthlyCharges</span>,
+          <span class="mono">TotalCharges</span>). The target is <span class="mono">Churn ∈ {Yes, No}</span>,
+          which we encode as $y \in \{1, 0\}$. The code reads from a local CSV; if it is absent it
+          synthesises a structurally identical frame so the notebook always runs.</p>
+
+        <div class="callout"><strong>Class imbalance.</strong> Roughly 27% of customers churn. A model that
+          always predicts “no churn” would already score ~73% accuracy while catching <em>zero</em>
+          churners — the first reason accuracy is the wrong headline metric here.</div>
+
+        <pre><code>import numpy as np
+import pandas as pd
+from pathlib import Path
+
+RANDOM_STATE = 42
+
+def load_churn(path="telco_churn.csv"):
+    """Load the Telco churn table, or synthesise a stand-in with the same schema."""
+    if Path(path).exists():
+        df = pd.read_csv(path)
+    else:
+        rng = np.random.default_rng(RANDOM_STATE)
+        n = 7043
+        tenure = rng.integers(0, 73, n)
+        monthly = rng.uniform(18, 119, n).round(2)
+        contract = rng.choice(["Month-to-month", "One year", "Two year"],
+                              size=n, p=[0.55, 0.21, 0.24])
+        internet = rng.choice(["DSL", "Fiber optic", "No"], size=n, p=[0.34, 0.44, 0.22])
+        # churn risk rises for short tenure, high bill, month-to-month, fiber
+        logit = (-2.4
+                 - 0.045 * tenure
+                 + 0.018 * monthly
+                 + (contract == "Month-to-month") * 1.6
+                 + (internet == "Fiber optic") * 0.7)
+        p = 1 / (1 + np.exp(-logit))
+        churn = (rng.random(n) &lt; p).astype(int)
+        df = pd.DataFrame({
+            "tenure": tenure,
+            "MonthlyCharges": monthly,
+            "TotalCharges": (tenure * monthly).round(2),
+            "Contract": contract,
+            "InternetService": internet,
+            "PaymentMethod": rng.choice(
+                ["Electronic check", "Mailed check",
+                 "Bank transfer", "Credit card"], size=n),
+            "Churn": np.where(churn == 1, "Yes", "No"),
+        })
+    return df
+
+df = load_churn()
+# TotalCharges sometimes arrives as blank strings in the real file:
+df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
+df = df.dropna(subset=["TotalCharges"]).reset_index(drop=True)
+
+y = (df["Churn"] == "Yes").astype(int)
+X = df.drop(columns=["Churn"])
+print(X.shape, "churn rate:", round(y.mean(), 3))</code></pre>
+        <p class="code-cap"># (7043, 6) churn rate: ~0.27</p>
+
+        <h3>Why this framing</h3>
+        <ul class="tight">
+          <li><strong>Supervised, binary:</strong> labelled outcome, two classes — the cleanest setting to
+            exercise the metrics from session 14.</li>
+          <li><strong>Mixed feature types:</strong> forces a real preprocessing pipeline (scaling numerics,
+            one-hot encoding categoricals) rather than a toy <span class="mono">make_classification</span> blob.</li>
+          <li><strong>Imbalanced &amp; cost-sensitive:</strong> mirrors session 9's <em>“managing imbalanced
+            classes”</em> — a false negative (a churner we miss) costs far more than a false positive.</li>
+        </ul>
+      </section>
+
+      <!-- 3. PIPELINE DESIGN --------------------------------------------- -->
+      <section class="demo" id="pipeline">
+        <h2>2 · Pipeline design — split, leakage, scaling</h2>
+
+        <h3>Train / test split</h3>
+        <p>We hold out 20% of the data as a final, untouched test set, and stratify on $y$ so the churn
+          rate is identical in both folds. The held-out set is touched <em>exactly once</em>, at the very end.
+          <span class="xref">(See the interactive
+          <a href="./index.html#split">train/test split &amp; overfitting</a> demo.)</span></p>
+
+        <h3>Avoiding data leakage</h3>
+        <p>The single most common project-killing bug: fitting any transformer (scaler, encoder, imputer)
+          on the <em>whole</em> dataset before splitting. The test set's statistics then leak into training and
+          inflate the score. The fix is to wrap every transform inside a
+          <code class="inline">Pipeline</code> / <code class="inline">ColumnTransformer</code> so that
+          <code class="inline">.fit()</code> only ever sees training rows, and cross-validation re-fits the
+          transforms <em>inside each fold</em>.</p>
+
+        <div class="callout"><strong>Rule.</strong> Fit on train, transform on both. Standardisation uses
+          $z = \dfrac{x - \mu_{\text{train}}}{\sigma_{\text{train}}}$ where $\mu_{\text{train}}, \sigma_{\text{train}}$
+          come from the training fold only — never the global mean. <span class="xref">(See the
+          <a href="./index.html#scale">feature scaling</a> demo.)</span></div>
+
+        <h3>Feature scaling &amp; encoding</h3>
+        <p>Logistic regression and distance-based models need comparable feature ranges, so numerics are
+          standardised. Tree ensembles are scale-invariant, but we keep one preprocessor for all models so the
+          comparison is apples-to-apples. Categoricals are one-hot encoded with
+          <code class="inline">handle_unknown="ignore"</code> so unseen categories at test time do not crash.</p>
+
+        <pre><code>from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split
+
+num_cols = ["tenure", "MonthlyCharges", "TotalCharges"]
+cat_cols = ["Contract", "InternetService", "PaymentMethod"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, stratify=y, random_state=RANDOM_STATE)
+
+numeric = Pipeline([
+    ("impute", SimpleImputer(strategy="median")),
+    ("scale", StandardScaler()),
+])
+categorical = Pipeline([
+    ("impute", SimpleImputer(strategy="most_frequent")),
+    ("onehot", OneHotEncoder(handle_unknown="ignore")),
+])
+
+preprocess = ColumnTransformer([
+    ("num", numeric, num_cols),
+    ("cat", categorical, cat_cols),
+])  # fit happens ONLY on training data, inside the pipeline</code></pre>
+        <p class="code-cap"># preprocess is now a reusable, leakage-safe first stage for every model</p>
+      </section>
+
+      <!-- 4. STEP-BY-STEP IMPLEMENTATION --------------------------------- -->
+      <section class="demo" id="impl">
+        <h2>3 · Step-by-step implementation</h2>
+
+        <!-- 4a baseline -->
+        <h3>3.1 Baseline — always predict the majority class</h3>
+        <p>Before any real model, establish the floor. A <code class="inline">DummyClassifier</code> that
+          always predicts “no churn” fixes the number every later model must beat. If a fancy model can't
+          beat the baseline, the features carry no signal.</p>
+        <pre><code>from sklearn.dummy import DummyClassifier
+from sklearn.metrics import accuracy_score, f1_score
+
+baseline = DummyClassifier(strategy="most_frequent").fit(X_train, y_train)
+pred = baseline.predict(X_test)
+print("baseline accuracy:", round(accuracy_score(y_test, pred), 3))  # ~0.73
+print("baseline F1 (churn):", round(f1_score(y_test, pred), 3))      # 0.0 — catches no churners</code></pre>
+
+        <!-- 4b logistic -->
+        <h3>3.2 Logistic regression — the linear probabilistic model</h3>
+        <p>Logistic regression models the log-odds as a linear function of the features and squashes it
+          through the sigmoid:</p>
+        <p>$$\hat p = \sigma(\mathbf{w}^\top\mathbf{x} + b), \qquad \sigma(z) = \frac{1}{1 + e^{-z}}.$$</p>
+        <p>Parameters are fit by minimising the average <strong>binary cross-entropy</strong> (log loss):</p>
+        <p>$$J(\mathbf{w}, b) = -\frac{1}{m}\sum_{i=1}^{m}\Big[\,y_i \log \hat p_i + (1 - y_i)\log(1 - \hat p_i)\,\Big].$$</p>
+        <p>The gradient with respect to a weight is strikingly simple — the error times the feature —
+          which is exactly what gradient descent steps along:</p>
+        <p>$$\frac{\partial J}{\partial w_j} = \frac{1}{m}\sum_{i=1}^{m}(\hat p_i - y_i)\,x_{ij},
+          \qquad w_j \leftarrow w_j - \eta\,\frac{\partial J}{\partial w_j}.$$</p>
+        <p class="xref">scikit-learn solves this with L-BFGS rather than vanilla gradient descent, but the
+          objective is identical. See the interactive
+          <a href="./index.html#gd">gradient descent</a> and
+          <a href="./index.html#logit">logistic regression</a> demos for the geometry. We pass
+          <code class="inline">class_weight="balanced"</code> to up-weight the rare churn class — the
+          imbalanced-data lever from session 9.</p>
+        <pre><code>from sklearn.linear_model import LogisticRegression
+
+logit = Pipeline([
+    ("prep", preprocess),
+    ("clf", LogisticRegression(max_iter=1000,
+                               class_weight="balanced",
+                               random_state=RANDOM_STATE)),
+])
+logit.fit(X_train, y_train)</code></pre>
+
+        <!-- 4c tree -->
+        <h3>3.3 Decision tree — recursive impurity reduction</h3>
+        <p>A decision tree greedily picks the split that most reduces node impurity. For Gini impurity on a
+          node with class proportions $p_k$:</p>
+        <p>$$G = 1 - \sum_{k} p_k^2, \qquad \text{(entropy variant) } \; H = -\sum_{k} p_k \log_2 p_k.$$</p>
+        <p>The chosen split maximises the impurity drop
+          $\Delta = G_{\text{parent}} - \big(\tfrac{n_L}{n}G_L + \tfrac{n_R}{n}G_R\big)$. Unconstrained trees
+          drive training impurity to zero and overfit, so we cap depth.
+          <span class="xref">(See the <a href="./index.html#tree">decision tree</a> demo.)</span></p>
+        <pre><code>from sklearn.tree import DecisionTreeClassifier
+
+tree = Pipeline([
+    ("prep", preprocess),
+    ("clf", DecisionTreeClassifier(max_depth=5,
+                                   class_weight="balanced",
+                                   random_state=RANDOM_STATE)),
+])
+tree.fit(X_train, y_train)</code></pre>
+
+        <!-- 4d random forest -->
+        <h3>3.4 Random forest — bagging many trees</h3>
+        <p>A single tree is high-variance. A random forest averages many de-correlated trees (each trained
+          on a bootstrap sample, each split considering a random feature subset), trading a little bias for a
+          large drop in variance — the ensembling idea from session 11.</p>
+        <pre><code>from sklearn.ensemble import RandomForestClassifier
+
+forest = Pipeline([
+    ("prep", preprocess),
+    ("clf", RandomForestClassifier(n_estimators=300,
+                                   class_weight="balanced",
+                                   random_state=RANDOM_STATE,
+                                   n_jobs=-1)),
+])
+forest.fit(X_train, y_train)</code></pre>
+
+        <!-- 4e cross-validation -->
+        <h3>3.5 Cross-validation — honest, low-variance estimates</h3>
+        <p>A single train/test split gives a noisy estimate. <strong>Stratified $k$-fold CV</strong> splits the
+          training data into $k$ folds, trains on $k-1$ and validates on the held-out fold, rotating through
+          all $k$. The reported score is the mean $\pm$ standard deviation across folds. Because the whole
+          pipeline (including the scaler/encoder) sits inside the estimator, each fold re-fits its
+          preprocessing — no leakage.</p>
+        <p class="xref">This is session 13's <em>“Cross-validation, Leave-one-out… bias-variance tradeoffs.”</em></p>
+        <pre><code>from sklearn.model_selection import StratifiedKFold, cross_val_score
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
+
+for name, model in [("logistic", logit), ("tree", tree), ("forest", forest)]:
+    scores = cross_val_score(model, X_train, y_train,
+                             cv=cv, scoring="roc_auc")
+    print(f"{name:9s} CV ROC-AUC = {scores.mean():.3f} ± {scores.std():.3f}")</code></pre>
+
+        <!-- 4f tuning -->
+        <h3>3.6 Hyperparameter tuning — GridSearchCV</h3>
+        <p>Hyperparameters (regularisation strength $C$, tree depth, number of estimators) are <em>not</em>
+          learned by fitting; they are searched. <code class="inline">GridSearchCV</code> wraps cross-validation
+          around every candidate combination and refits the best on the full training set. We optimise for
+          ROC-AUC, which is threshold-independent and robust to imbalance.</p>
+        <pre><code>from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    "clf__n_estimators": [200, 400],
+    "clf__max_depth": [None, 8, 14],
+    "clf__min_samples_leaf": [1, 4, 10],
+}
+search = GridSearchCV(forest, param_grid, cv=cv,
+                      scoring="roc_auc", n_jobs=-1, refit=True)
+search.fit(X_train, y_train)
+
+best = search.best_estimator_
+print("best params:", search.best_params_)
+print("best CV ROC-AUC:", round(search.best_score_, 3))</code></pre>
+        <p class="code-cap"># refit=True → `best` is already retrained on all of X_train with the winning params</p>
+
+        <!-- 4g final eval -->
+        <h3>3.7 Final evaluation on the held-out test set</h3>
+        <p>Only now do we touch <code class="inline">X_test</code> — once. We pull predicted probabilities,
+          pick an operating threshold, and compute every metric.</p>
+        <pre><code>from sklearn.metrics import (classification_report, confusion_matrix,
+                             roc_auc_score, average_precision_score,
+                             RocCurveDisplay, PrecisionRecallDisplay)
+
+proba = best.predict_proba(X_test)[:, 1]
+pred  = (proba &gt;= 0.50).astype(int)
+
+print(classification_report(y_test, pred, target_names=["stay", "churn"]))
+print("ROC-AUC :", round(roc_auc_score(y_test, proba), 3))
+print("PR-AUC  :", round(average_precision_score(y_test, proba), 3))
+
+cm = confusion_matrix(y_test, pred)   # rows = actual, cols = predicted
+print(cm)</code></pre>
+      </section>
+
+      <!-- 5. RESULTS ----------------------------------------------------- -->
+      <section class="demo" id="results">
+        <h2>4 · Results</h2>
+        <p>Representative numbers on the held-out test set (your exact figures will vary with the seed and
+          whether the real CSV is present). The shape of the story is what matters: every model beats the
+          baseline on the metrics that count, and the tuned forest leads on ranking quality (AUC).</p>
+
+        <h3>Metrics comparison</h3>
+        <table class="tbl">
+          <thead>
+            <tr><th>Model</th><th class="mono">Accuracy</th><th class="mono">Precision</th>
+                <th class="mono">Recall</th><th class="mono">F1</th><th class="mono">ROC-AUC</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Baseline (majority)</td><td class="mono">0.734</td><td class="mono">—</td><td class="mono">0.000</td><td class="mono">0.000</td><td class="mono">0.500</td></tr>
+            <tr><td>Logistic regression</td><td class="mono">0.745</td><td class="mono">0.51</td><td class="mono">0.79</td><td class="mono">0.62</td><td class="mono">0.843</td></tr>
+            <tr><td>Decision tree (d=5)</td><td class="mono">0.762</td><td class="mono">0.54</td><td class="mono">0.68</td><td class="mono">0.60</td><td class="mono">0.812</td></tr>
+            <tr><td>Random forest (tuned)</td><td class="mono">0.781</td><td class="mono">0.58</td><td class="mono">0.72</td><td class="mono"><strong>0.64</strong></td><td class="mono"><strong>0.857</strong></td></tr>
+          </tbody>
+        </table>
+        <p class="figcap">Precision/recall reported for the positive (churn) class. The baseline's perfect
+          73% accuracy with 0% recall is the cautionary tale.</p>
+
+        <h3>Confusion matrix — tuned random forest</h3>
+        <p>For the threshold $\hat p \ge 0.5$ on the 1,409-row test set:</p>
+        <div class="cmwrap">
+          <div class="cm">
+            <div class="lab"></div>
+            <div class="lab">pred · stay</div>
+            <div class="lab">pred · churn</div>
+            <div class="lab">actual · stay</div>
+            <div class="box tn"><div class="n">880</div><div class="t">TN</div></div>
+            <div class="box fp"><div class="n">155</div><div class="t">FP</div></div>
+            <div class="lab">actual · churn</div>
+            <div class="box fn"><div class="n">104</div><div class="t">FN</div></div>
+            <div class="box tp"><div class="n">270</div><div class="t">TP</div></div>
+          </div>
+          <p class="cmnote">From these four counts every scalar metric follows:
+            $\text{precision} = \tfrac{TP}{TP+FP}$, $\text{recall} = \tfrac{TP}{TP+FN}$,
+            $F_1 = \tfrac{2\,PR}{P+R}$. Here recall $\approx 0.72$ (we catch ~72% of churners) at
+            precision $\approx 0.64$. <span class="xref">See the live
+            <a href="./index.html#cm">confusion matrix &amp; threshold</a> demo.</span></p>
+        </div>
+
+        <h3>Precision–recall &amp; the threshold</h3>
+        <p>The 0.5 threshold is a default, not a law. Lowering it raises recall (catch more churners) at the
+          cost of precision (more false alarms). Because retention outreach is cheap relative to a lost
+          customer, the business may push the threshold down to, say, 0.35 to lift recall toward 0.85 —
+          a deliberate, cost-driven choice read straight off the precision–recall curve.</p>
+
+        <h3>ROC curve &amp; AUC</h3>
+        <p>Sweeping the threshold from 1 to 0 traces the ROC curve of true-positive rate
+          $\text{TPR} = \tfrac{TP}{TP+FN}$ against false-positive rate
+          $\text{FPR} = \tfrac{FP}{FP+TN}$. The area under it,</p>
+        <p>$$\text{AUC} = \int_0^1 \text{TPR}\,\mathrm{d}(\text{FPR}) = P\big(\hat p_{+} &gt; \hat p_{-}\big),$$</p>
+        <p>is the probability the model ranks a random churner above a random stayer. The tuned forest's
+          AUC $\approx 0.857$ means it gets that ranking right ~86% of the time — well above the diagonal
+          0.5 of a coin flip. <span class="xref">See the <a href="./index.html#roc">ROC / AUC</a> demo.</span>
+          In code the whole curve is one call:</p>
+        <pre><code>import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+RocCurveDisplay.from_estimator(best, X_test, y_test, ax=ax[0])
+PrecisionRecallDisplay.from_estimator(best, X_test, y_test, ax=ax[1])
+ax[0].plot([0, 1], [0, 1], "k--", lw=1)   # chance diagonal
+ax[0].set_title("ROC"); ax[1].set_title("Precision–Recall")
+plt.tight_layout(); plt.show()</code></pre>
+      </section>
+
+      <!-- 6. BIAS-VARIANCE & ERROR ANALYSIS ------------------------------ -->
+      <section class="demo" id="biasvar">
+        <h2>5 · Bias–variance &amp; error analysis</h2>
+        <p>Expected test error of a model decomposes into three parts:</p>
+        <p>$$\mathbb{E}\big[(y - \hat f(\mathbf{x}))^2\big]
+          = \underbrace{\big(\text{Bias}[\hat f]\big)^2}_{\text{under-fit}}
+          + \underbrace{\text{Var}[\hat f]}_{\text{over-fit}}
+          + \underbrace{\sigma^2}_{\text{irreducible}}.$$</p>
+        <p>The three models sit at different points on this curve:</p>
+        <ul class="tight">
+          <li><strong>Logistic regression</strong> is high-bias / low-variance: its linear boundary can't
+            capture interactions, so train and test scores are close but both modest. It <em>under-fits</em>.</li>
+          <li><strong>A deep, unpruned tree</strong> is the opposite — near-perfect training accuracy, a
+            large train→test gap. It <em>over-fits</em> (memorises noise).</li>
+          <li><strong>The random forest</strong> tames a tree's variance by averaging, landing near the
+            sweet spot — which is why it tops the AUC table.</li>
+        </ul>
+        <p class="xref">The interactive <a href="./index.html#bv">bias–variance</a> and
+          <a href="./index.html#split">overfitting</a> demos make this tradeoff tangible. Diagnose it in code
+          by comparing train vs CV scores: a large gap ⇒ variance (regularise / get more data); both low ⇒
+          bias (richer model / more features).</p>
+        <pre><code>from sklearn.model_selection import learning_curve
+
+# A widening train-vs-validation gap is the fingerprint of variance (overfitting).
+train_sizes, train_sc, val_sc = learning_curve(
+    best, X_train, y_train, cv=cv, scoring="roc_auc",
+    train_sizes=np.linspace(0.1, 1.0, 6), n_jobs=-1)
+print("train AUC:", train_sc.mean(axis=1).round(3))
+print("valid AUC:", val_sc.mean(axis=1).round(3))</code></pre>
+
+        <h3>Error analysis</h3>
+        <p>Beyond aggregate metrics, inspect <em>where</em> the model errs. Feature importances (or logistic
+          coefficients) show <span class="mono">Contract=Month-to-month</span>, short
+          <span class="mono">tenure</span> and <span class="mono">Fiber optic</span> service dominate churn
+          risk — consistent with the data-generating story. Slicing recall by contract type often reveals the
+          model is weakest exactly where churn is rarest, pointing to the next round of feature work.</p>
+      </section>
+
+      <!-- 7. MAPPING TO LEARNING OUTCOMES -------------------------------- -->
+      <section class="demo" id="outcomes">
+        <h2>6 · Mapping to learning outcomes</h2>
+        <p>Each project step lands on a concrete syllabus outcome and an interactive demo:</p>
+        <table class="tbl">
+          <thead><tr><th>Project step</th><th>Syllabus session / outcome</th><th>Demo</th></tr></thead>
+          <tbody>
+            <tr><td>Load, clean, impute, encode</td><td>S3 data prep · S4 feature engineering</td><td><a href="./index.html#scale">scaling</a></td></tr>
+            <tr><td>Train/test split, leakage avoidance</td><td>S6 generalization &amp; overfitting</td><td><a href="./index.html#split">train/test</a></td></tr>
+            <tr><td>Logistic regression + cross-entropy</td><td>S5 loss &amp; gradient descent</td><td><a href="./index.html#gd">grad. descent</a> · <a href="./index.html#logit">logistic</a></td></tr>
+            <tr><td>Decision tree / random forest</td><td>S5 algorithms · S11 ensembles</td><td><a href="./index.html#tree">tree</a></td></tr>
+            <tr><td>Stratified k-fold cross-validation</td><td>S13 model evaluation</td><td><a href="./index.html#bv">bias–variance</a></td></tr>
+            <tr><td>GridSearchCV tuning</td><td>S11 pipelines &amp; hyper-tuning</td><td>—</td></tr>
+            <tr><td>Confusion matrix, P/R, F1</td><td>S14 performance metrics</td><td><a href="./index.html#cm">confusion</a></td></tr>
+            <tr><td>ROC curve &amp; AUC</td><td>S14 sensitivity / specificity</td><td><a href="./index.html#roc">ROC/AUC</a></td></tr>
+            <tr><td>Class weighting / imbalance</td><td>S9 imbalanced classes</td><td>—</td></tr>
+            <tr><td>Bias–variance diagnosis</td><td>S13 bias-variance tradeoffs</td><td><a href="./index.html#bv">bias–variance</a></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 8. EXTENSIONS -------------------------------------------------- -->
+      <section class="demo" id="extend">
+        <h2>7 · Extensions</h2>
+        <ol class="steps">
+          <li><strong>Probability calibration.</strong> Wrap the forest in
+            <code class="inline">CalibratedClassifierCV</code> so $\hat p$ can be read as a true probability —
+            essential when a downstream business rule thresholds on it.</li>
+          <li><strong>Gradient-boosted trees.</strong> Swap in
+            <code class="inline">HistGradientBoostingClassifier</code> or XGBoost; usually the single biggest
+            AUC jump on tabular data.</li>
+          <li><strong>Resampling for imbalance.</strong> Compare <span class="mono">class_weight</span> against
+            SMOTE oversampling (<span class="mono">imbalanced-learn</span>) inside the CV pipeline.</li>
+          <li><strong>Dimensionality reduction.</strong> Add a PCA step to visualise class separation and
+            test whether it helps the linear model. <span class="xref">(See the
+            <a href="./index.html#pca">PCA</a> demo.)</span></li>
+          <li><strong>Explainability.</strong> Use permutation importance or SHAP values for per-customer
+            reason codes — the interpretability theme of session 22.</li>
+          <li><strong>Cost-sensitive thresholding.</strong> Choose the operating point that minimises expected
+            business cost given the price of a false negative vs a false positive.</li>
+        </ol>
+      </section>
+
+      <!-- 9. REFERENCES -------------------------------------------------- -->
+      <section class="demo" id="references">
+        <h2>8 · References</h2>
+        <ul class="refs">
+          <li>Burkov, A. (2020). <em>Machine Learning Engineering.</em> True Positive Inc. — course compulsory
+            text (esp. Ch. 3 data, Ch. 4 features, Ch. 5–6 supervised training, Ch. 7 evaluation).</li>
+          <li>Burkov, A. (2019). <em>The Hundred-Page Machine Learning Book.</em> — recommended.</li>
+          <li>Pedregosa et&nbsp;al. (2011). <em>scikit-learn: Machine Learning in Python.</em> JMLR 12, 2825–2830.
+            See the User Guide on <span class="mono">Pipeline</span>, <span class="mono">ColumnTransformer</span>,
+            <span class="mono">GridSearchCV</span> and model evaluation.</li>
+          <li>Hastie, Tibshirani &amp; Friedman (2009). <em>The Elements of Statistical Learning</em> —
+            bias–variance decomposition, trees, ensembles.</li>
+          <li>ml-lab interactive demos: <a href="./index.html">index.html</a> ·
+            course outline: <a href="./course.html">course.html</a>.</li>
+        </ul>
+      </section>
+
+    </main>
+
+    <footer>
+      <span>ml-lab — Andrea Montana · IE BCSAI</span>
+      <span class="more">
+        <a href="./index.html">interactive demos</a>
+        <a href="./course.html">course outline</a>
+        <a href="https://github.com/andreaisabelmontana/ml-lab" target="_blank">source</a>
+      </span>
+    </footer>
+  </body>
+</html>
