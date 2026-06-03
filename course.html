@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#4338CA" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>ml-lab · course outline — AI: Machine Learning Foundations</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+            onload="renderMathInElement(document.body, { delimiters: [{left:'$$', right:'$$', display:true},{left:'$', right:'$', display:false}], ignoredTags: ['option','script','textarea'] })"></script>
+
+    <link rel="stylesheet" href="./style.css" />
+
+    <style>
+      /* course.html — scoped extras, reusing :root tokens only (no new palette) */
+      .lead { color: var(--ink-soft); font-size: 0.92rem; margin: 0 0 0.85rem; max-width: 70ch; }
+      .lead + .lead { margin-top: -0.4rem; }
+
+      /* meta grid */
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.6rem;
+        margin-top: 0.4rem;
+      }
+      .meta .cell {
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 0.55rem 0.7rem;
+        background: var(--bg);
+      }
+      .meta .cell .k { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+      .meta .cell .v { color: var(--ink); font-weight: 700; font-size: 0.9rem; margin-top: 0.15rem; }
+      .meta .cell .v.mono { font-family: var(--font-mono); }
+
+      /* objective list */
+      ul.obj { list-style: none; margin: 0.2rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+      ul.obj li { display: flex; gap: 0.6rem; color: var(--ink-soft); font-size: 0.88rem; }
+      ul.obj li::before {
+        content: ''; flex: none; width: 8px; height: 8px; border-radius: 2px;
+        background: var(--accent); margin-top: 0.42em;
+      }
+      ul.obj li strong { color: var(--ink); font-weight: 600; }
+
+      /* %-bars */
+      .bars { display: flex; flex-direction: column; gap: 0.55rem; margin-top: 0.3rem; }
+      .bar-row { display: grid; grid-template-columns: minmax(140px, 230px) 1fr auto; align-items: center; gap: 0.7rem; }
+      .bar-row .lbl { color: var(--ink-soft); font-size: 0.82rem; }
+      .bar-track { background: var(--rule); border-radius: 999px; height: 9px; overflow: hidden; }
+      .bar-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+      .bar-fill.soft { background: var(--accent-soft); border: 1px solid var(--accent); }
+      .bar-row .pct { font-family: var(--font-mono); font-weight: 600; font-size: 0.82rem; color: var(--ink); min-width: 3.4em; text-align: right; }
+      .bar-note { color: var(--muted); font-size: 0.76rem; margin-top: 0.5rem; }
+
+      .split2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+      @media (max-width: 760px) { .split2 { grid-template-columns: 1fr; gap: 1rem; } .bar-row { grid-template-columns: 1fr; gap: 0.2rem; } .bar-row .pct { text-align: left; } }
+      .split2 h3 { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink); margin: 0 0 0.6rem; }
+
+      /* module + timeline */
+      .module { margin-top: 1.1rem; }
+      .module:first-of-type { margin-top: 0.3rem; }
+      .module > .mod-head {
+        display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
+        padding-bottom: 0.4rem; margin-bottom: 0.6rem;
+        border-bottom: 1px solid var(--rule-h);
+      }
+      .mod-head .mod-no { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; color: #fff; background: var(--accent); border-radius: 4px; padding: 0.1em 0.5em; }
+      .mod-head .mod-title { font-weight: 700; font-size: 0.95rem; color: var(--ink); letter-spacing: -0.01em; }
+      .mod-head .mod-meta { color: var(--muted); font-size: 0.76rem; font-family: var(--font-mono); }
+
+      .timeline { display: flex; flex-direction: column; }
+      .sess {
+        position: relative;
+        padding: 0 0 0.95rem 1.6rem;
+        border-left: 1px solid var(--rule);
+        margin-left: 0.55rem;
+      }
+      .sess:last-child { border-left-color: transparent; padding-bottom: 0; }
+      .sess::before {
+        content: ''; position: absolute; left: -5px; top: 0.25rem;
+        width: 9px; height: 9px; border-radius: 999px;
+        background: var(--paper); border: 2px solid var(--accent);
+      }
+      .sess.is-practice::before { background: var(--accent); }
+      .sess .s-no { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; color: var(--muted); }
+      .sess .s-title { font-weight: 700; font-size: 0.9rem; color: var(--ink); margin: 0.05rem 0 0.2rem; letter-spacing: -0.01em; }
+      .sess .s-obj { color: var(--ink-soft); font-size: 0.84rem; margin: 0 0 0.4rem; }
+      .sess ul.topics { list-style: none; margin: 0 0 0.45rem; padding: 0; display: flex; flex-direction: column; gap: 0.22rem; }
+      .sess ul.topics li { color: var(--muted); font-size: 0.82rem; padding-left: 0.9rem; position: relative; }
+      .sess ul.topics li::before { content: '–'; position: absolute; left: 0; color: var(--rule-h); }
+
+      .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+      .tag {
+        font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+        color: var(--ink-soft); background: var(--bg);
+        border: 1px solid var(--rule); border-radius: 999px;
+        padding: 0.12em 0.6em;
+      }
+      .tag.read { color: var(--ink-soft); }
+      .tag.assign { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+      .tag.demo { color: var(--accent); }
+      a.tag.demo:hover { border-color: var(--accent); border-bottom-color: var(--accent); }
+
+      .anchor-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.2rem; }
+      .anchor-nav a {
+        font-size: 0.78rem; color: var(--ink-soft); border: 1px solid var(--rule);
+        border-radius: 999px; padding: 0.18em 0.7em;
+      }
+      .anchor-nav a:hover { color: var(--accent); border-color: var(--accent); }
+
+      .biblio { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.3rem; }
+      .biblio .ref { border-left: 2px solid var(--accent); padding: 0.1rem 0 0.1rem 0.8rem; }
+      .biblio .ref .b-tag { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+      .biblio .ref .b-cite { color: var(--ink); font-size: 0.88rem; margin: 0.1rem 0; }
+      .biblio .ref .b-cite em { color: var(--ink); font-style: italic; font-weight: 600; }
+      .biblio .ref .b-note { color: var(--muted); font-size: 0.82rem; }
+      .prof-name { color: var(--ink); font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="title">
+        <span class="dot"></span><strong>ml-lab</strong>
+        <span class="sub">course outline · AI: Machine Learning Foundations</span>
+      </div>
+      <nav>
+        <a href="./index.html">← interactive demos</a>
+        <a href="#overview">overview</a>
+        <a href="#objectives">objectives</a>
+        <a href="#method">methodology</a>
+        <a href="#program">program</a>
+        <a href="#biblio">bibliography</a>
+        <a href="./SYLLABUS.pdf" target="_blank">syllabus PDF</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- OVERVIEW + META --------------------------------------------- -->
+      <section class="demo" id="overview">
+        <h2>AI: Machine Learning Foundations</h2>
+        <p class="cap">Bachelor in Computer Science &amp; Artificial Intelligence (BCSAI) · IE University ·
+          a 30-session, syllabus-driven map of the course — every module and every session, with the
+          interactive <a href="./index.html">ml-lab demos</a> cross-linked where they bring a concept to life.</p>
+
+        <p class="lead">Artificial Intelligence has moved into the mainstream driven by advances in cloud
+          computing, big data, open-source software, and improved algorithms — fundamentally altering how we
+          work, live, and manage businesses. Machine Learning is the cornerstone of that shift: systems that
+          are not directly programmed to solve a problem, but instead build their own program from examples
+          or from trial-and-error experience.</p>
+        <p class="lead">This course introduces the field and sets up a framework of knowledge for making
+          informed analysis of the opportunities and challenges of applying ML in business. It blends a
+          theoretical/conceptual approach with a hands-on technical understanding of every stage of an ML
+          project, implemented in Python (pandas, matplotlib, scikit-learn, TensorFlow, PyTorch) at a
+          basic-to-intermediate level — always keeping the business perspective in view.</p>
+
+        <div class="meta">
+          <div class="cell"><div class="k">Program</div><div class="v">BCSAI — Computer Science &amp; AI</div></div>
+          <div class="cell"><div class="k">Course code</div><div class="v mono">AIMLF-CSAI.2.M.B</div></div>
+          <div class="cell"><div class="k">Area</div><div class="v">Computer Science</div></div>
+          <div class="cell"><div class="k">Sessions</div><div class="v mono">30</div></div>
+          <div class="cell"><div class="k">Credits</div><div class="v mono">6.0 ECTS</div></div>
+          <div class="cell"><div class="k">Academic year</div><div class="v mono">2025–26</div></div>
+          <div class="cell"><div class="k">Degree course</div><div class="v">Second</div></div>
+          <div class="cell"><div class="k">Semester</div><div class="v mono">2º</div></div>
+          <div class="cell"><div class="k">Category</div><div class="v">Compulsory</div></div>
+          <div class="cell"><div class="k">Language</div><div class="v">English</div></div>
+          <div class="cell"><div class="k">Workload</div><div class="v mono">150 h · 3–8 h/wk</div></div>
+          <div class="cell"><div class="k">Professor</div><div class="v">José Manuel Rey González</div></div>
+        </div>
+      </section>
+
+      <!-- LEARNING OBJECTIVES ----------------------------------------- -->
+      <section class="demo" id="objectives">
+        <h2>Learning objectives</h2>
+        <p class="cap">The main objective is to introduce students to ML and build a framework for analysing
+          the opportunities and challenges of applying it in business. Specifically, the course aims to:</p>
+        <ul class="obj">
+          <li><strong>Contextual understanding.</strong> Acquire a contextual understanding of ML, its history
+            and evolution, to make relevant predictions about its future trajectory.</li>
+          <li><strong>Strategic impact.</strong> Understand the profound, strategic changes ML introduces in
+            technological and business environments, and appreciate ML as a key source of competitive advantage
+            for firms.</li>
+          <li><strong>Solution design.</strong> Analyse the features and components of ML solutions, understand
+            the approaches for designing and implementing them, and assess the challenges, difficulties and
+            risks in their successful deployment.</li>
+          <li><strong>Application fit.</strong> Evaluate the appropriateness of a business application for
+            prediction, optimization, natural language processing, robotics, computer vision and other emergent
+            areas.</li>
+          <li><strong>Staying current.</strong> Know how to stay continuously updated on new trends and advances
+            in the ML field.</li>
+        </ul>
+        <p class="bar-note">By the end, students should use Python and its ecosystem to access and analyse data
+          from several sources, build predictive models with supervised and unsupervised techniques, perform
+          feature engineering, and tune and compare models against metrics such as accuracy and speed.</p>
+      </section>
+
+      <!-- METHODOLOGY + ASSESSMENT ------------------------------------ -->
+      <section class="demo" id="method">
+        <h2>Methodology &amp; assessment</h2>
+        <p class="cap">The course progresses from the most basic ML concepts to increasingly difficult
+          problems, contrasting methods to explain when each is most appropriate. It is lecture- and
+          example-based with group in-class discussions, following a tailored path for future AI Managers:
+          from theory, to the tools and techniques that make implementation possible, to deployable business
+          solutions.</p>
+
+        <div class="split2">
+          <div>
+            <h3>Learning-activity weighting</h3>
+            <div class="bars">
+              <div class="bar-row">
+                <span class="lbl">Exercises · async · field work</span>
+                <span class="bar-track"><span class="bar-fill" style="width:53.3%"></span></span>
+                <span class="pct">53.3%</span>
+              </div>
+              <div class="bar-row">
+                <span class="lbl">Lectures</span>
+                <span class="bar-track"><span class="bar-fill" style="width:16.7%"></span></span>
+                <span class="pct">16.7%</span>
+              </div>
+              <div class="bar-row">
+                <span class="lbl">Individual studying</span>
+                <span class="bar-track"><span class="bar-fill" style="width:13.3%"></span></span>
+                <span class="pct">13.3%</span>
+              </div>
+              <div class="bar-row">
+                <span class="lbl">Group work</span>
+                <span class="bar-track"><span class="bar-fill" style="width:10%"></span></span>
+                <span class="pct">10.0%</span>
+              </div>
+              <div class="bar-row">
+                <span class="lbl">Discussions</span>
+                <span class="bar-track"><span class="bar-fill" style="width:6.7%"></span></span>
+                <span class="pct">6.7%</span>
+              </div>
+            </div>
+            <p class="bar-note">Total dedication ≈ 150 hours (80 h exercises · 25 h lectures · 20 h individual
+              study · 15 h group work · 10 h discussions).</p>
+          </div>
+
+          <div>
+            <h3>Assessment weighting</h3>
+            <div class="bars">
+              <div class="bar-row">
+                <span class="lbl">Final exam</span>
+                <span class="bar-track"><span class="bar-fill" style="width:30%"></span></span>
+                <span class="pct">30%</span>
+              </div>
+              <div class="bar-row">
+                <span class="lbl">Individual assignments</span>
+                <span class="bar-track"><span class="bar-fill" style="width:30%"></span></span>
+                <span class="pct">30%</span>
+              </div>
+              <div class="bar-row">
+                <span class="lbl">Participation</span>
+                <span class="bar-track"><span class="bar-fill" style="width:20%"></span></span>
+                <span class="pct">20%</span>
+              </div>
+              <div class="bar-row">
+                <span class="lbl">Group assignment</span>
+                <span class="bar-track"><span class="bar-fill" style="width:12%"></span></span>
+                <span class="pct">12%</span>
+              </div>
+              <div class="bar-row">
+                <span class="lbl">Group presentation</span>
+                <span class="bar-track"><span class="bar-fill" style="width:8%"></span></span>
+                <span class="pct">8%</span>
+              </div>
+            </div>
+            <p class="bar-note">One formal test/exam plus practice "test-exams". 80% attendance required.
+              GenAI tools are allowed for assignments and exam practice with acknowledgement — but not during
+              the final exam.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROGRAM ----------------------------------------------------- -->
+      <section class="demo" id="program">
+        <h2>Program — 30 sessions</h2>
+        <p class="cap">The schedule below mirrors the syllabus exactly: knowledge blocks integrate theory
+          first, then practice/tutorials, then assignments of assorted complexity. Filled timeline dots mark
+          hands-on practice/assignment sessions. Where a concept maps to a live demo, a
+          <span class="tag demo">demo ↗</span> tag links straight to it.</p>
+
+        <div class="anchor-nav">
+          <a href="#m1">I · Foundations &amp; the ML pipeline</a>
+          <a href="#m2">II · Core algorithms &amp; training</a>
+          <a href="#m3">III · Practice, integration &amp; tuning</a>
+          <a href="#m4">IV · Evaluation &amp; deployment</a>
+          <a href="#m5">V · Neural networks &amp; deep learning</a>
+          <a href="#m6">VI · Frontiers, applications &amp; assessment</a>
+        </div>
+
+        <!-- MODULE I ------------------------------------------------- -->
+        <div class="module" id="m1">
+          <div class="mod-head">
+            <span class="mod-no">I</span>
+            <span class="mod-title">Foundations &amp; the machine-learning pipeline</span>
+            <span class="mod-meta">sessions 1–4</span>
+          </div>
+          <div class="timeline">
+
+            <div class="sess">
+              <div class="s-no">SESSION 1 · MLF_01</div>
+              <div class="s-title">Introduction</div>
+              <p class="s-obj">The basic concepts about AI and its application in ML are introduced.</p>
+              <ul class="topics">
+                <li>General definition of intelligence and knowledge representation</li>
+                <li>Basic algorithms and the analysis of typical intractable problems</li>
+                <li>Heuristic approaches to hard problems</li>
+              </ul>
+              <div class="tags"><span class="tag read">ML Engineering · Ch.1 Introduction</span></div>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 2 · MLF_02</div>
+              <div class="s-title">The anatomy of a machine-learning project</div>
+              <p class="s-obj">Exploration of the general pipeline for ML projects.</p>
+              <ul class="topics">
+                <li>Definition of project scope, goals and required domain knowledge</li>
+                <li>Multidisciplinary team formation</li>
+              </ul>
+              <div class="tags"><span class="tag read">ML Engineering · Ch.2 Before the Project Starts</span></div>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 3 · MLF_03</div>
+              <div class="s-title">The importance of data — collection &amp; preparation</div>
+              <p class="s-obj">Analysis of typical data issues and how to fix them.</p>
+              <ul class="topics">
+                <li>Missing values and imputation; outliers</li>
+                <li>Risks of data leakage</li>
+                <li>Data transformation (one-hot encoding and other methods)</li>
+              </ul>
+              <div class="tags">
+                <span class="tag read">ML Engineering · Ch.3 Data Collection &amp; Preparation</span>
+                <a class="tag demo" href="./index.html#scale">feature scaling demo ↗</a>
+              </div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 4 · MLF_04</div>
+              <div class="s-title">Feature engineering</div>
+              <p class="s-obj">The concept of a feature, and how to build and select features.</p>
+              <ul class="topics">
+                <li>Feature extraction and feature selection (methods available)</li>
+                <li>Complexity analysis and dimensionality reduction</li>
+              </ul>
+              <div class="tags">
+                <span class="tag assign">Assignment · Data Preparation</span>
+                <span class="tag read">ML Engineering · Ch.4 Feature Engineering</span>
+                <a class="tag demo" href="./index.html#pca">PCA demo ↗</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MODULE II ------------------------------------------------ -->
+        <div class="module" id="m2">
+          <div class="mod-head">
+            <span class="mod-no">II</span>
+            <span class="mod-title">Core algorithms &amp; supervised training</span>
+            <span class="mod-meta">sessions 5–7</span>
+          </div>
+          <div class="timeline">
+
+            <div class="sess">
+              <div class="s-no">SESSION 5 · MLF_05</div>
+              <div class="s-title">Fundamental algorithms</div>
+              <p class="s-obj">A taxonomy of the main families of ML algorithms and the principles behind them.</p>
+              <ul class="topics">
+                <li>Supervised vs unsupervised; parametric vs non-parametric</li>
+                <li>Instance-based vs model-based; manual feature extraction vs representational methods</li>
+                <li>Reflex vs state- and variable-based models</li>
+                <li>General principles: loss functions and gradient descent</li>
+              </ul>
+              <div class="tags">
+                <a class="tag demo" href="./index.html#gd">gradient descent demo ↗</a>
+                <a class="tag demo" href="./index.html#knn">k-NN demo ↗</a>
+              </div>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 6 · MLF_06</div>
+              <div class="s-title">Anatomy of an ML algorithm — supervised model training, the basics</div>
+              <p class="s-obj">General architecture and training methods for supervised models.</p>
+              <ul class="topics">
+                <li>Task analysis: regression vs classification</li>
+                <li>Performance metrics</li>
+                <li>Overfitting and generalization</li>
+              </ul>
+              <div class="tags">
+                <span class="tag read">ML Engineering · Ch.5–6 Supervised Model Training</span>
+                <a class="tag demo" href="./index.html#logit">logistic regression demo ↗</a>
+                <a class="tag demo" href="./index.html#split">train/test &amp; overfitting demo ↗</a>
+              </div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 7 · MLF_07</div>
+              <div class="s-title">A first basic practice</div>
+              <p class="s-obj">An end-to-end practical case, from EDA to model training and validation.</p>
+              <ul class="topics">
+                <li>Exploratory data analysis through to validation</li>
+                <li>Testing of various classical machine-learning algorithms</li>
+              </ul>
+              <div class="tags">
+                <span class="tag assign">Assignment (70 pts)</span>
+                <a class="tag demo" href="./index.html#tree">decision tree demo ↗</a>
+                <a class="tag demo" href="./index.html#knn">k-NN demo ↗</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MODULE III ----------------------------------------------- -->
+        <div class="module" id="m3">
+          <div class="mod-head">
+            <span class="mod-no">III</span>
+            <span class="mod-title">Unsupervised learning, practice &amp; integration</span>
+            <span class="mod-meta">sessions 8–12</span>
+          </div>
+          <div class="timeline">
+
+            <div class="sess">
+              <div class="s-no">SESSION 8 · MLF_08</div>
+              <div class="s-title">Unsupervised learning</div>
+              <p class="s-obj">General architecture and algorithmic approach to learning without labels.</p>
+              <ul class="topics">
+                <li>Principal component analysis and clustering — main concepts</li>
+                <li>Performance metrics and types of use</li>
+                <li>Concepts of similarity, entropy and other related functions</li>
+              </ul>
+              <div class="tags">
+                <a class="tag demo" href="./index.html#kmeans">k-means demo ↗</a>
+                <a class="tag demo" href="./index.html#pca">PCA demo ↗</a>
+              </div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 9 · MLF_09</div>
+              <div class="s-title">A more advanced practice</div>
+              <p class="s-obj">Tackling the messier realities of real-world data.</p>
+              <ul class="topics">
+                <li>Managing imbalanced classes</li>
+                <li>Sampling biases</li>
+                <li>Handling uncertainty: epistemic vs aleatoric</li>
+              </ul>
+              <div class="tags"><a class="tag demo" href="./index.html#cm">confusion matrix demo ↗</a></div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 10 · MLF_10</div>
+              <div class="s-title">Assignment review</div>
+              <p class="s-obj">Dissection and discussion of sample solutions.</p>
+              <ul class="topics">
+                <li>Walk-through of sample solutions</li>
+                <li>Exploration of the main difficulties encountered</li>
+              </ul>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 11 · MLF_11</div>
+              <div class="s-title">ML integration — pipelines, ensemble methods, hyper-tuning</div>
+              <p class="s-obj">Composing and optimising models for production.</p>
+              <ul class="topics">
+                <li>Ensemble methods and pipelines of algorithms</li>
+                <li>Methods for hyper-parameter tuning</li>
+                <li>The future of AutoML; Bayesian optimization of parameters</li>
+              </ul>
+              <div class="tags"><a class="tag demo" href="./index.html#bv">bias–variance demo ↗</a></div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 12 · MLF_12</div>
+              <div class="s-title">A first practical overview of typical applications</div>
+              <p class="s-obj">An end-to-end practical case of a business application.</p>
+              <ul class="topics">
+                <li>Main concepts in play</li>
+                <li>General strategy for successful implementation</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MODULE IV ------------------------------------------------ -->
+        <div class="module" id="m4">
+          <div class="mod-head">
+            <span class="mod-no">IV</span>
+            <span class="mod-title">Model evaluation &amp; deployment</span>
+            <span class="mod-meta">sessions 13–15</span>
+          </div>
+          <div class="timeline">
+
+            <div class="sess">
+              <div class="s-no">SESSION 13 · MLF_13</div>
+              <div class="s-title">Model evaluation</div>
+              <p class="s-obj">An extended analysis of validation methods.</p>
+              <ul class="topics">
+                <li>Cross-validation, leave-one-out and their cases of use</li>
+                <li>Performance metrics and consistency</li>
+                <li>Bias–variance tradeoffs</li>
+              </ul>
+              <div class="tags">
+                <span class="tag read">ML Engineering · Ch.7 Model Evaluation</span>
+                <a class="tag demo" href="./index.html#bv">bias–variance demo ↗</a>
+                <a class="tag demo" href="./index.html#split">train/test demo ↗</a>
+              </div>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 14 · MLF_14</div>
+              <div class="s-title">Performance metrics</div>
+              <p class="s-obj">Review and comparison of performance metrics across paradigms.</p>
+              <ul class="topics">
+                <li>Supervised vs unsupervised metrics</li>
+                <li>Accuracy, F-alpha score, sensitivity and specificity</li>
+                <li>Generalization to multi-class and multi-label classification</li>
+              </ul>
+              <div class="tags">
+                <a class="tag demo" href="./index.html#cm">confusion matrix demo ↗</a>
+                <a class="tag demo" href="./index.html#roc">ROC / AUC demo ↗</a>
+              </div>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 15 · MLF_15</div>
+              <div class="s-title">Model deployment &amp; maintenance — an introduction / overview</div>
+              <p class="s-obj">Taking a model beyond the notebook and keeping it healthy.</p>
+              <ul class="topics">
+                <li>The model life-cycle</li>
+                <li>Data drift and concept drift</li>
+              </ul>
+              <div class="tags"><span class="tag read">ML Engineering · Ch.8–9 Deployment, Serving, Monitoring &amp; Maintenance</span></div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MODULE V ------------------------------------------------- -->
+        <div class="module" id="m5">
+          <div class="mod-head">
+            <span class="mod-no">V</span>
+            <span class="mod-title">Neural networks &amp; deep learning</span>
+            <span class="mod-meta">sessions 16–19</span>
+          </div>
+          <div class="timeline">
+
+            <div class="sess">
+              <div class="s-no">SESSION 16 · MLF_16</div>
+              <div class="s-title">Neural networks &amp; deep learning</div>
+              <p class="s-obj">Introduction to the perceptron and multi-layer perceptron.</p>
+              <ul class="topics">
+                <li>Inner workings and mathematical foundation of a neural network</li>
+                <li>Forward and backward propagation; automatic differentiation</li>
+                <li>Gradient descent and its adaptive variants; main hyperparameters</li>
+                <li>Dropout and other regularization techniques</li>
+              </ul>
+              <div class="tags"><a class="tag demo" href="./index.html#gd">gradient descent demo ↗</a></div>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 17 · MLF_17</div>
+              <div class="s-title">Neural networks — representation learning</div>
+              <p class="s-obj">How networks learn useful representations of data.</p>
+              <ul class="topics">
+                <li>Representation-learning techniques explained through practical examples</li>
+                <li>Representational models</li>
+                <li>Typical well-known architectures and their uses</li>
+              </ul>
+              <div class="tags"><a class="tag demo" href="./index.html#pca">PCA demo ↗</a></div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 18 · MLF_18</div>
+              <div class="s-title">Practice recap</div>
+              <p class="s-obj">How to code a neural network from the building blocks.</p>
+              <ul class="topics">
+                <li>Basic concepts: tensors and gradient tapes</li>
+                <li>Activation functions and optimizers</li>
+                <li>General design principles</li>
+              </ul>
+              <div class="tags"><span class="tag assign">Assignment (70 pts)</span></div>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 19 · MLF_19</div>
+              <div class="s-title">Reinforcement learning — an introductory overview</div>
+              <p class="s-obj">Intelligent agents that learn from the state-action-reward paradigm.</p>
+              <ul class="topics">
+                <li>Temporal differences and the Bellman optimality equation</li>
+                <li>From iterative value-function optimization to policy-gradient algorithms</li>
+                <li>Analysis of a practical example case of use</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MODULE VI ------------------------------------------------ -->
+        <div class="module" id="m6">
+          <div class="mod-head">
+            <span class="mod-no">VI</span>
+            <span class="mod-title">Frontiers, applications &amp; assessment</span>
+            <span class="mod-meta">sessions 20–30</span>
+          </div>
+          <div class="timeline">
+
+            <div class="sess">
+              <div class="s-no">SESSION 20 · MLF_20</div>
+              <div class="s-title">Sequential modeling — from time-series analysis to deep NN models</div>
+              <p class="s-obj">Modeling data where order and time matter.</p>
+              <ul class="topics">
+                <li>Specific issues in time/sequential-data feature engineering</li>
+                <li>Basic techniques involved</li>
+                <li>Example-based analysis of sequential-modeling approaches and their evolution</li>
+              </ul>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 21 · MLF_21</div>
+              <div class="s-title">Transfer learning &amp; contrastive learning — theoretical basis and principles</div>
+              <p class="s-obj">Reusing learned knowledge across tasks.</p>
+              <ul class="topics">
+                <li>Shallow training: principles and concepts</li>
+                <li>Introduction to basic fine-tuning techniques</li>
+                <li>Perspectives for transfer learning and multi-task learning</li>
+              </ul>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 22 · MLF_22</div>
+              <div class="s-title">Summarizing ML best practices — some problems and solutions</div>
+              <p class="s-obj">Applying the solutions explored to different types of problems.</p>
+              <ul class="topics">
+                <li>Explainability and interpretability</li>
+                <li>End-to-end practical case analysis</li>
+                <li>ML/DL business-function application</li>
+              </ul>
+              <div class="tags"><span class="tag assign">Group Assignment (70 pts)</span></div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 23 · MLF_23</div>
+              <div class="s-title">Deep generative models</div>
+              <p class="s-obj">Exploration of some of the novel architectures in this field.</p>
+              <ul class="topics">
+                <li>Contrastive learning, cross-embeddings and their new applications</li>
+                <li>Text-to-image and text-to-video</li>
+                <li>A brief analysis of Generative Adversarial Networks and Diffusion Models</li>
+              </ul>
+              <div class="tags"><span class="tag assign">Examination practice (40 pts)</span></div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 24 · MLF_24</div>
+              <div class="s-title">Advanced practice</div>
+              <p class="s-obj">Advanced practice recap consolidating the deep-learning material.</p>
+              <ul class="topics">
+                <li>Recap and reinforcement of advanced practical techniques</li>
+              </ul>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 25 · MLF_25</div>
+              <div class="s-title">Applied machine learning — the industry view</div>
+              <p class="s-obj">A high-level exploration of business cases and applications.</p>
+              <ul class="topics">
+                <li>Applications across different industries</li>
+              </ul>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 26 · MLF_26</div>
+              <div class="s-title">Extended practice — case review</div>
+              <p class="s-obj">Dissection and discussion of sample solutions.</p>
+              <ul class="topics">
+                <li>Walk-through of sample solutions</li>
+                <li>Exploration of the main difficulties</li>
+              </ul>
+            </div>
+
+            <div class="sess">
+              <div class="s-no">SESSION 27 · MLF_27</div>
+              <div class="s-title">Real-world business applications — challenges, risks &amp; steps ahead</div>
+              <p class="s-obj">Where the field is heading and what could go wrong.</p>
+              <ul class="topics">
+                <li>Analysis of current research and expected breakthroughs</li>
+                <li>Summary of risks: from adversarial attacks to mesa-optimization disalignment</li>
+              </ul>
+              <div class="tags"><span class="tag read">ML Engineering · Ch.10 Conclusion</span></div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 28 · MLF_28</div>
+              <div class="s-title">Test / exam</div>
+              <p class="s-obj">Concept-summary review examination.</p>
+              <ul class="topics">
+                <li>Not a final exam — its score is added to the other evaluation items</li>
+                <li>No minimum passing grade required</li>
+              </ul>
+              <div class="tags"><span class="tag assign">Test / Exam (180 pts)</span></div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 29 · MLF_29</div>
+              <div class="s-title">Group projects — presentations (A)</div>
+              <p class="s-obj">Presentations, discussion and Q&amp;A of group projects.</p>
+              <ul class="topics">
+                <li>First round of group-project presentations</li>
+              </ul>
+              <div class="tags"><span class="tag assign">Group Presentation (50 pts)</span></div>
+            </div>
+
+            <div class="sess is-practice">
+              <div class="s-no">SESSION 30 · MLF_30</div>
+              <div class="s-title">Group projects — presentations (B) · wrap-up</div>
+              <p class="s-obj">Final presentations and course wrap-up.</p>
+              <ul class="topics">
+                <li>Second round of group-project presentations, discussion and Q&amp;A</li>
+                <li>Course wrap-up</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- BIBLIOGRAPHY ------------------------------------------------ -->
+      <section class="demo" id="biblio">
+        <h2>Bibliography</h2>
+        <p class="cap">The program follows one applied text as its backbone, with a concise companion for quick
+          reference.</p>
+        <div class="biblio">
+          <div class="ref">
+            <div class="b-tag">Compulsory</div>
+            <p class="b-cite">Andriy Burkov (2020). <em>Machine Learning Engineering</em>. True Positive Inc.
+              ISBN 978-1-9995795-7-9 (Digital).</p>
+            <p class="b-note">The most complete applied AI book out there — filled with best practices and design
+              patterns for building reliable, scaling ML solutions. Burkov holds a Ph.D. in AI and led a machine-learning
+              team at Gartner; the book draws on 15 years of solving problems with AI.</p>
+          </div>
+          <div class="ref">
+            <div class="b-tag">Recommended</div>
+            <p class="b-cite">Andriy Burkov (2019). <em>The Hundred-Page Machine Learning Book</em>.
+              ISBN 1-9995795-0-X (Digital).</p>
+            <p class="b-note">A successful effort to reduce all of machine learning to 100 pages — well-chosen
+              topics across theory and practice, a solid introduction for practitioners.</p>
+          </div>
+        </div>
+        <p class="bar-note">Professor <span class="prof-name">José Manuel Rey González</span> ·
+          <a href="mailto:jreyg@faculty.ie.edu">jreyg@faculty.ie.edu</a> · office hours on request.
+          Full details in the <a href="./SYLLABUS.pdf" target="_blank">syllabus PDF</a>.</p>
+      </section>
+    </main>
+
+    <footer>
+      <span>ml-lab — Andrea Montana · IE BCSAI</span>
+      <span class="more">
+        <a href="./index.html">interactive demos</a>
+        <a href="./SYLLABUS.pdf" target="_blank">syllabus</a>
+        <a href="https://github.com/andreaisabelmontana/ml-lab" target="_blank">source</a>
+      </span>
+    </footer>
+  </body>
+</html>
