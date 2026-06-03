@@ -75,6 +75,17 @@
       .mod-head .mod-title { font-weight: 700; font-size: 0.95rem; color: var(--ink); letter-spacing: -0.01em; }
       .mod-head .mod-meta { color: var(--muted); font-size: 0.76rem; font-family: var(--font-mono); }
 
+      /* module overview + outcomes */
+      .mod-intro { color: var(--ink-soft); font-size: 0.86rem; margin: 0 0 0.6rem; max-width: 74ch; }
+      .outcomes {
+        background: var(--bg); border: 1px solid var(--rule); border-radius: 6px;
+        padding: 0.6rem 0.8rem 0.7rem; margin: 0 0 0.9rem;
+      }
+      .outcomes .oc-head { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; margin-bottom: 0.35rem; }
+      .outcomes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.28rem; }
+      .outcomes li { color: var(--ink-soft); font-size: 0.83rem; padding-left: 1.1rem; position: relative; }
+      .outcomes li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-weight: 700; font-size: 0.78rem; }
+
       .timeline { display: flex; flex-direction: column; }
       .sess {
         position: relative;
@@ -95,6 +106,18 @@
       .sess ul.topics { list-style: none; margin: 0 0 0.45rem; padding: 0; display: flex; flex-direction: column; gap: 0.22rem; }
       .sess ul.topics li { color: var(--muted); font-size: 0.82rem; padding-left: 0.9rem; position: relative; }
       .sess ul.topics li::before { content: '–'; position: absolute; left: 0; color: var(--rule-h); }
+      .sess ul.topics li b { color: var(--ink-soft); font-weight: 600; }
+
+      /* per-session formula + key-idea boxes */
+      .formula {
+        background: var(--bg); border: 1px solid var(--rule); border-left: 2px solid var(--accent);
+        border-radius: 4px; padding: 0.45rem 0.65rem; margin: 0 0 0.45rem;
+      }
+      .formula .f-lbl { font-family: var(--font-mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 600; display: block; margin-bottom: 0.15rem; }
+      .formula .f-body { color: var(--ink); font-size: 0.86rem; }
+      .formula .f-body .desc { color: var(--muted); font-size: 0.78rem; display: block; margin-top: 0.2rem; }
+      .keyidea { color: var(--ink-soft); font-size: 0.82rem; margin: 0 0 0.45rem; padding-left: 0.9rem; border-left: 2px solid var(--rule-h); }
+      .keyidea b { color: var(--ink); font-weight: 600; }
 
       .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
       .tag {
@@ -107,6 +130,9 @@
       .tag.assign { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
       .tag.demo { color: var(--accent); }
       a.tag.demo:hover { border-color: var(--accent); border-bottom-color: var(--accent); }
+      /* annotation under tags */
+      .tag-note { color: var(--muted); font-size: 0.76rem; margin: 0.3rem 0 0; }
+      .tag-note b { color: var(--ink-soft); font-weight: 600; }
 
       .anchor-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.2rem; }
       .anchor-nav a {
@@ -115,12 +141,34 @@
       }
       .anchor-nav a:hover { color: var(--accent); border-color: var(--accent); }
 
+      /* glossary */
+      .glossary {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem 1.4rem; margin-top: 0.3rem;
+      }
+      @media (max-width: 760px) { .glossary { grid-template-columns: 1fr; } }
+      .glossary .term { padding-bottom: 0.45rem; border-bottom: 1px dotted var(--rule); }
+      .glossary .term dt { font-weight: 700; color: var(--ink); font-size: 0.85rem; }
+      .glossary .term dt .mq { font-family: var(--font-mono); font-weight: 500; color: var(--accent); font-size: 0.78rem; }
+      .glossary .term dd { margin: 0.15rem 0 0; color: var(--ink-soft); font-size: 0.82rem; }
+
+      /* assessment detail cards */
+      .assess { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.4rem; }
+      .assess .ac { border: 1px solid var(--rule); border-radius: 6px; padding: 0.6rem 0.8rem; background: var(--bg); }
+      .assess .ac .ac-top { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+      .assess .ac .ac-name { font-weight: 700; color: var(--ink); font-size: 0.88rem; }
+      .assess .ac .ac-w { font-family: var(--font-mono); font-size: 0.78rem; color: #fff; background: var(--accent); border-radius: 999px; padding: 0.05em 0.55em; }
+      .assess .ac .ac-pts { font-family: var(--font-mono); font-size: 0.74rem; color: var(--muted); }
+      .assess .ac p { margin: 0.3rem 0 0; color: var(--ink-soft); font-size: 0.82rem; }
+      .assess .ac p .k { color: var(--ink); font-weight: 600; }
+
       .biblio { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.3rem; }
       .biblio .ref { border-left: 2px solid var(--accent); padding: 0.1rem 0 0.1rem 0.8rem; }
       .biblio .ref .b-tag { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
       .biblio .ref .b-cite { color: var(--ink); font-size: 0.88rem; margin: 0.1rem 0; }
       .biblio .ref .b-cite em { color: var(--ink); font-style: italic; font-weight: 600; }
       .biblio .ref .b-note { color: var(--muted); font-size: 0.82rem; }
+      .biblio .ref .b-map { color: var(--ink-soft); font-size: 0.78rem; margin-top: 0.25rem; }
+      .biblio .ref .b-map .mono { font-family: var(--font-mono); color: var(--accent); }
       .prof-name { color: var(--ink); font-weight: 600; }
     </style>
   </head>
@@ -136,6 +184,7 @@
         <a href="#objectives">objectives</a>
         <a href="#method">methodology</a>
         <a href="#program">program</a>
+        <a href="#glossary">key concepts</a>
         <a href="#biblio">bibliography</a>
         <a href="./SYLLABUS.pdf" target="_blank">syllabus PDF</a>
       </nav>
@@ -159,6 +208,10 @@
           theoretical/conceptual approach with a hands-on technical understanding of every stage of an ML
           project, implemented in Python (pandas, matplotlib, scikit-learn, TensorFlow, PyTorch) at a
           basic-to-intermediate level — always keeping the business perspective in view.</p>
+        <p class="lead">Formally, supervised learning fits a function $f_\theta : \mathcal{X} \to \mathcal{Y}$
+          by choosing parameters $\theta$ that minimise an empirical risk
+          $\hat{R}(\theta) = \frac{1}{n}\sum_{i=1}^{n} L\!\left(y_i, f_\theta(x_i)\right)$ over a training set of
+          $n$ examples — a single idea that recurs, in different guises, through almost every session below.</p>
 
         <div class="meta">
           <div class="cell"><div class="k">Program</div><div class="v">BCSAI — Computer Science &amp; AI</div></div>
@@ -198,7 +251,10 @@
         </ul>
         <p class="bar-note">By the end, students should use Python and its ecosystem to access and analyse data
           from several sources, build predictive models with supervised and unsupervised techniques, perform
-          feature engineering, and tune and compare models against metrics such as accuracy and speed.</p>
+          feature engineering, and tune and compare models against metrics such as accuracy and speed. The
+          professor's stated personal goal: that you walk away with a strong conceptual grasp of the
+          technologies behind ML, the ability to build a business case for ML in your organisation, and a
+          strong desire to go deeper.</p>
       </section>
 
       <!-- METHODOLOGY + ASSESSMENT ------------------------------------ -->
@@ -209,6 +265,15 @@
           example-based with group in-class discussions, following a tailored path for future AI Managers:
           from theory, to the tools and techniques that make implementation possible, to deployable business
           solutions.</p>
+
+        <p class="lead">Six teaching elements run through the term: <b>lectures</b> (theory, with on-time
+          comprehension checks), <b>examples / tutorials / cases</b> (preparatory for assignments, with
+          what-if interactive analysis), <b>discussions</b> (some announced in advance, requiring
+          preparation), <b>assignments</b> (implement an algorithm in Python / Jupyter and analyse results),
+          <b>exams</b> (one formal test plus practice "test-exams"), and <b>group work</b> (a final project
+          presentation). Individual assignments are delivered in dynamically formed small groups; the final
+          group project uses preference-based grouping. GenAI tools are allowed — with acknowledgement — for
+          research, coding and exam practice, but never during the final exam.</p>
 
         <div class="split2">
           <div>
@@ -278,6 +343,47 @@
               the final exam.</p>
           </div>
         </div>
+
+        <h3 style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink);margin:1.2rem 0 0.5rem;">Assessment components in detail</h3>
+        <div class="assess">
+          <div class="ac">
+            <div class="ac-top"><span class="ac-name">Final exam</span><span class="ac-w">30%</span><span class="ac-pts">test/exam · 180 pts max (MLF_28)</span></div>
+            <p><span class="k">Deliverable:</span> a concept-summary review examination written in class without GenAI.
+              <span class="k">Evaluation:</span> most questions are drawn from the practice "test-exam" pool. It is
+              formally "not a final exam" in the continuous track — its score is added to the other items and carries
+              no minimum passing grade.</p>
+          </div>
+          <div class="ac">
+            <div class="ac-top"><span class="ac-name">Individual assignments</span><span class="ac-w">30%</span><span class="ac-pts">3 × 70 pts (MLF_07 · 18 · 22) + 40 pts practice (MLF_23)</span></div>
+            <p><span class="k">Deliverable:</span> Python Jupyter notebooks implementing an algorithm end-to-end, with a
+              written summary and analysis of results; review criteria are published per task.
+              <span class="k">Evaluation:</span> done jointly in dynamically formed small groups (no pair repeats);
+              collaboration is enforced inside the group only. Some may run as a "bake-off" scored on held-out test data.</p>
+          </div>
+          <div class="ac">
+            <div class="ac-top"><span class="ac-name">Participation</span><span class="ac-w">20%</span><span class="ac-pts">4 pts / session × 30 = 120 pts</span></div>
+            <p><span class="k">Deliverable:</span> prepared, professional-level engagement in every session — questions,
+              discussion and group interaction. <span class="k">Evaluation:</span> a fixed 4 points per session;
+              "come prepared as if it were a meeting in your company."</p>
+          </div>
+          <div class="ac">
+            <div class="ac-top"><span class="ac-name">Group assignment</span><span class="ac-w">12%</span><span class="ac-pts">part of the 120-pt group track</span></div>
+            <p><span class="k">Deliverable:</span> the final group project (MLF_22 onward), with preference-based grouping.
+              <span class="k">Evaluation:</span> applies the full pipeline to a business problem with explainability and
+              interpretability in focus.</p>
+          </div>
+          <div class="ac">
+            <div class="ac-top"><span class="ac-name">Group presentation</span><span class="ac-w">8%</span><span class="ac-pts">50 pts (MLF_29–30)</span></div>
+            <p><span class="k">Deliverable:</span> a presentation of the group project with discussion and Q&amp;A.
+              <span class="k">Evaluation:</span> communication quality and depth of the work shown.</p>
+          </div>
+        </div>
+        <p class="bar-note">Roughly one third of the grade comes from attendance/participation, one third from
+          individual assignments, and one third from participation + group work and presentation.
+          <b>Pass &amp; attendance rules:</b> 80% attendance is required — students below it fail both the ordinary
+          and extraordinary (June/July re-sit) calls and must re-enrol. The re-sit is a single comprehensive exam
+          (continuous evaluation is ignored), passing grade 5 with a maximum of 8.0. Four calls are allowed across
+          two academic years; failing more than 18 ECTS after re-sits means leaving the program.</p>
       </section>
 
       <!-- PROGRAM ----------------------------------------------------- -->
@@ -286,7 +392,9 @@
         <p class="cap">The schedule below mirrors the syllabus exactly: knowledge blocks integrate theory
           first, then practice/tutorials, then assignments of assorted complexity. Filled timeline dots mark
           hands-on practice/assignment sessions. Where a concept maps to a live demo, a
-          <span class="tag demo">demo ↗</span> tag links straight to it.</p>
+          <span class="tag demo">demo ↗</span> tag links straight to it. Each session below carries the core
+          formula or definition it rests on, plus a short key-idea takeaway. (The schedule is tentative; pace
+          adapts to the group and to recent advances in the field.)</p>
 
         <div class="anchor-nav">
           <a href="#m1">I · Foundations &amp; the ML pipeline</a>
@@ -304,6 +412,19 @@
             <span class="mod-title">Foundations &amp; the machine-learning pipeline</span>
             <span class="mod-meta">sessions 1–4</span>
           </div>
+          <p class="mod-intro">The opening block frames what intelligence and learning mean computationally,
+            then walks the lifecycle of a real ML project from scoping through data preparation to feature
+            engineering. The message: most of the work — and most of the risk — lives before any model is
+            trained.</p>
+          <div class="outcomes">
+            <div class="oc-head">By the end of Module I you should be able to</div>
+            <ul>
+              <li>Explain how learning systems differ from explicitly programmed ones, and why some problems are intractable.</li>
+              <li>Lay out the stages of an ML project and the roles a cross-functional team needs.</li>
+              <li>Diagnose and repair common data issues — missing values, outliers, leakage — and encode variables correctly.</li>
+              <li>Construct, transform and select features, and reason about dimensionality.</li>
+            </ul>
+          </div>
           <div class="timeline">
 
             <div class="sess">
@@ -311,11 +432,18 @@
               <div class="s-title">Introduction</div>
               <p class="s-obj">The basic concepts about AI and its application in ML are introduced.</p>
               <ul class="topics">
-                <li>General definition of intelligence and knowledge representation</li>
-                <li>Basic algorithms and the analysis of typical intractable problems</li>
-                <li>Heuristic approaches to hard problems</li>
+                <li><b>Intelligence &amp; knowledge representation:</b> what it means for a system to "know" and act on knowledge.</li>
+                <li><b>Basic algorithms &amp; intractable problems:</b> why brute-force search fails as problems scale.</li>
+                <li><b>Heuristics:</b> approximate strategies that trade guaranteed optimality for tractable runtime.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core definition · empirical risk</span>
+                <span class="f-body">$\hat{R}(\theta) = \frac{1}{n}\sum_{i=1}^{n} L\!\left(y_i, f_\theta(x_i)\right)$
+                  <span class="desc">Learning = picking parameters $\theta$ that minimise average loss $L$ over the data, instead of hand-coding rules.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> a learner replaces an explicit program with an optimisation problem over examples.</p>
               <div class="tags"><span class="tag read">ML Engineering · Ch.1 Introduction</span></div>
+              <p class="tag-note"><b>Reading:</b> Burkov Ch.1 sets terminology and the "what is ML engineering" framing for the whole course.</p>
             </div>
 
             <div class="sess">
@@ -323,10 +451,17 @@
               <div class="s-title">The anatomy of a machine-learning project</div>
               <p class="s-obj">Exploration of the general pipeline for ML projects.</p>
               <ul class="topics">
-                <li>Definition of project scope, goals and required domain knowledge</li>
-                <li>Multidisciplinary team formation</li>
+                <li><b>Scope &amp; goals:</b> translating a business question into a measurable prediction target.</li>
+                <li><b>Domain knowledge &amp; teams:</b> assembling the multidisciplinary skills a project needs.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Framing · expected value of a model</span>
+                <span class="f-body">$\text{value} = \mathbb{E}\big[\text{benefit}(\hat{y}, y)\big] - \text{cost}_{\text{build}} - \text{cost}_{\text{run}}$
+                  <span class="desc">A project is worth doing only when expected decision value exceeds the cost of building and operating the model.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> define success and feasibility before touching data — most ML projects fail in the framing, not the math.</p>
               <div class="tags"><span class="tag read">ML Engineering · Ch.2 Before the Project Starts</span></div>
+              <p class="tag-note"><b>Reading:</b> Burkov Ch.2 — prioritising projects, estimating complexity, and team/role planning.</p>
             </div>
 
             <div class="sess">
@@ -334,14 +469,21 @@
               <div class="s-title">The importance of data — collection &amp; preparation</div>
               <p class="s-obj">Analysis of typical data issues and how to fix them.</p>
               <ul class="topics">
-                <li>Missing values and imputation; outliers</li>
-                <li>Risks of data leakage</li>
-                <li>Data transformation (one-hot encoding and other methods)</li>
+                <li><b>Missing values &amp; imputation:</b> replacing gaps (e.g. with the mean/median) without distorting signal.</li>
+                <li><b>Outliers &amp; leakage:</b> spotting anomalous points and stopping target information from leaking into features.</li>
+                <li><b>Transformation:</b> one-hot encoding and related methods to make data model-ready.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formula · standardisation (z-score)</span>
+                <span class="f-body">$z = \dfrac{x - \mu}{\sigma}$
+                  <span class="desc">Rescales each feature to zero mean and unit variance so no feature dominates by units alone.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> data leakage — letting the model peek at the answer — is the most common cause of "too good" results that collapse in production.</p>
               <div class="tags">
                 <span class="tag read">ML Engineering · Ch.3 Data Collection &amp; Preparation</span>
                 <a class="tag demo" href="./index.html#scale">feature scaling demo ↗</a>
               </div>
+              <p class="tag-note"><b>Reading:</b> Burkov Ch.3 on data quality, leakage and partitioning. <b>Demo:</b> see scaling change a model's decision boundary live.</p>
             </div>
 
             <div class="sess is-practice">
@@ -349,14 +491,22 @@
               <div class="s-title">Feature engineering</div>
               <p class="s-obj">The concept of a feature, and how to build and select features.</p>
               <ul class="topics">
-                <li>Feature extraction and feature selection (methods available)</li>
-                <li>Complexity analysis and dimensionality reduction</li>
+                <li><b>Extraction:</b> deriving informative variables from raw data.</li>
+                <li><b>Selection:</b> keeping the features that matter (filter, wrapper, embedded methods).</li>
+                <li><b>Dimensionality:</b> complexity analysis and reduction to fight the curse of dimensionality.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formula · PCA objective</span>
+                <span class="f-body">$\max_{\|w\|=1} \operatorname{Var}(Xw) = w^\top \Sigma\, w$
+                  <span class="desc">Principal components are the directions $w$ of maximum variance — the leading eigenvectors of the covariance matrix $\Sigma$.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> good features often beat fancy models; reducing dimensions can improve both speed and generalization.</p>
               <div class="tags">
                 <span class="tag assign">Assignment · Data Preparation</span>
                 <span class="tag read">ML Engineering · Ch.4 Feature Engineering</span>
                 <a class="tag demo" href="./index.html#pca">PCA demo ↗</a>
               </div>
+              <p class="tag-note"><b>Assignment (Data Preparation):</b> clean, encode and feature-engineer a real dataset in a notebook. <b>Reading:</b> Burkov Ch.4. <b>Demo:</b> watch variance concentrate along principal axes.</p>
             </div>
 
           </div>
@@ -369,6 +519,18 @@
             <span class="mod-title">Core algorithms &amp; supervised training</span>
             <span class="mod-meta">sessions 5–7</span>
           </div>
+          <p class="mod-intro">With clean data in hand, the course turns to the algorithm zoo: how to organise
+            ML methods into families, how supervised models are actually trained by minimising a loss, and how
+            to run a first end-to-end case from exploration to validation.</p>
+          <div class="outcomes">
+            <div class="oc-head">By the end of Module II you should be able to</div>
+            <ul>
+              <li>Classify algorithms along the main axes (supervised/unsupervised, parametric/non-parametric, instance/model-based).</li>
+              <li>Describe how loss functions and gradient descent drive training.</li>
+              <li>Distinguish regression from classification and choose appropriate performance metrics.</li>
+              <li>Recognise overfitting and reason about generalization on held-out data.</li>
+            </ul>
+          </div>
           <div class="timeline">
 
             <div class="sess">
@@ -376,15 +538,22 @@
               <div class="s-title">Fundamental algorithms</div>
               <p class="s-obj">A taxonomy of the main families of ML algorithms and the principles behind them.</p>
               <ul class="topics">
-                <li>Supervised vs unsupervised; parametric vs non-parametric</li>
-                <li>Instance-based vs model-based; manual feature extraction vs representational methods</li>
-                <li>Reflex vs state- and variable-based models</li>
-                <li>General principles: loss functions and gradient descent</li>
+                <li><b>Supervised vs unsupervised</b>; <b>parametric vs non-parametric.</b></li>
+                <li><b>Instance-based vs model-based</b>; manual feature extraction vs representational methods.</li>
+                <li><b>Reflex vs state/variable-based</b> models.</li>
+                <li><b>General principles:</b> loss functions and gradient descent.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formula · gradient-descent update</span>
+                <span class="f-body">$\theta_{t+1} = \theta_t - \eta\, \nabla_\theta L(\theta_t)$
+                  <span class="desc">Step downhill along the loss gradient with learning rate $\eta$ — the engine behind most model training.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> nearly every algorithm is "a model class + a loss + an optimiser"; the taxonomy just varies those three choices.</p>
               <div class="tags">
                 <a class="tag demo" href="./index.html#gd">gradient descent demo ↗</a>
                 <a class="tag demo" href="./index.html#knn">k-NN demo ↗</a>
               </div>
+              <p class="tag-note"><b>Demos:</b> gradient descent shows the update rule converging; k-NN illustrates a non-parametric, instance-based learner with no training step.</p>
             </div>
 
             <div class="sess">
@@ -392,15 +561,23 @@
               <div class="s-title">Anatomy of an ML algorithm — supervised model training, the basics</div>
               <p class="s-obj">General architecture and training methods for supervised models.</p>
               <ul class="topics">
-                <li>Task analysis: regression vs classification</li>
-                <li>Performance metrics</li>
-                <li>Overfitting and generalization</li>
+                <li><b>Task analysis:</b> regression (continuous target) vs classification (discrete label).</li>
+                <li><b>Performance metrics</b> appropriate to each task.</li>
+                <li><b>Overfitting &amp; generalization:</b> fitting signal, not noise.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formulas · MSE &amp; cross-entropy</span>
+                <span class="f-body">$\text{MSE} = \frac{1}{n}\sum_i (y_i-\hat{y}_i)^2 \qquad
+                  \mathcal{L}_{\text{CE}} = -\frac{1}{n}\sum_i\big[y_i\log\hat{p}_i + (1-y_i)\log(1-\hat{p}_i)\big]$
+                  <span class="desc">MSE for regression; binary cross-entropy for classification — the two workhorse loss functions.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> the loss you choose <em>is</em> your definition of "good" — pick it to match the task and the cost of errors.</p>
               <div class="tags">
                 <span class="tag read">ML Engineering · Ch.5–6 Supervised Model Training</span>
                 <a class="tag demo" href="./index.html#logit">logistic regression demo ↗</a>
                 <a class="tag demo" href="./index.html#split">train/test &amp; overfitting demo ↗</a>
               </div>
+              <p class="tag-note"><b>Reading:</b> Burkov Ch.5–6 (Supervised Model Training, Parts 1–2). <b>Demos:</b> logistic regression fits a probability boundary; train/test split exposes overfitting.</p>
             </div>
 
             <div class="sess is-practice">
@@ -408,14 +585,21 @@
               <div class="s-title">A first basic practice</div>
               <p class="s-obj">An end-to-end practical case, from EDA to model training and validation.</p>
               <ul class="topics">
-                <li>Exploratory data analysis through to validation</li>
-                <li>Testing of various classical machine-learning algorithms</li>
+                <li><b>Exploratory data analysis</b> through to validation.</li>
+                <li><b>Comparing classical algorithms</b> (k-NN, trees, linear models) on the same task.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formula · accuracy</span>
+                <span class="f-body">$\text{Accuracy} = \dfrac{\text{TP}+\text{TN}}{\text{TP}+\text{TN}+\text{FP}+\text{FN}}$
+                  <span class="desc">The fraction of correct predictions — a first, simple yardstick for comparing models.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> a clean, reproducible pipeline (EDA → split → fit → validate) matters more than any single algorithm.</p>
               <div class="tags">
                 <span class="tag assign">Assignment (70 pts)</span>
                 <a class="tag demo" href="./index.html#tree">decision tree demo ↗</a>
                 <a class="tag demo" href="./index.html#knn">k-NN demo ↗</a>
               </div>
+              <p class="tag-note"><b>Assignment (70 pts):</b> deliver a notebook that runs the full classical-ML pipeline and compares models; may be run as a bake-off on held-out data. <b>Demos:</b> trees and k-NN as contrasting model families.</p>
             </div>
 
           </div>
@@ -428,6 +612,18 @@
             <span class="mod-title">Unsupervised learning, practice &amp; integration</span>
             <span class="mod-meta">sessions 8–12</span>
           </div>
+          <p class="mod-intro">This block adds learning without labels (clustering, dimensionality reduction),
+            confronts the messy realities of real data (imbalance, sampling bias, uncertainty), and shows how
+            to compose and tune models into production-grade pipelines.</p>
+          <div class="outcomes">
+            <div class="oc-head">By the end of Module III you should be able to</div>
+            <ul>
+              <li>Apply PCA and clustering, and measure unsupervised results with suitable metrics.</li>
+              <li>Handle imbalanced classes and sampling bias, and distinguish epistemic from aleatoric uncertainty.</li>
+              <li>Build pipelines, combine models with ensembles, and tune hyper-parameters systematically.</li>
+              <li>Carry a business application end-to-end and explain the strategy behind it.</li>
+            </ul>
+          </div>
           <div class="timeline">
 
             <div class="sess">
@@ -435,14 +631,21 @@
               <div class="s-title">Unsupervised learning</div>
               <p class="s-obj">General architecture and algorithmic approach to learning without labels.</p>
               <ul class="topics">
-                <li>Principal component analysis and clustering — main concepts</li>
-                <li>Performance metrics and types of use</li>
-                <li>Concepts of similarity, entropy and other related functions</li>
+                <li><b>PCA &amp; clustering:</b> the two main unsupervised workhorses.</li>
+                <li><b>Metrics &amp; uses:</b> how to judge structure with no ground-truth labels.</li>
+                <li><b>Similarity &amp; entropy:</b> functions that quantify distance and disorder.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formula · k-means objective</span>
+                <span class="f-body">$\min_{\{C_k\}} \sum_{k=1}^{K}\sum_{x\in C_k} \lVert x-\mu_k\rVert^2$
+                  <span class="desc">Partition points into $K$ clusters so each is close to its centroid $\mu_k$ — minimising within-cluster variance.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> without labels, "good" means compact, well-separated structure — defined entirely by a chosen similarity measure.</p>
               <div class="tags">
                 <a class="tag demo" href="./index.html#kmeans">k-means demo ↗</a>
                 <a class="tag demo" href="./index.html#pca">PCA demo ↗</a>
               </div>
+              <p class="tag-note"><b>Demos:</b> k-means iterates centroid assignment live; PCA reduces dimensions while preserving variance.</p>
             </div>
 
             <div class="sess is-practice">
@@ -450,11 +653,18 @@
               <div class="s-title">A more advanced practice</div>
               <p class="s-obj">Tackling the messier realities of real-world data.</p>
               <ul class="topics">
-                <li>Managing imbalanced classes</li>
-                <li>Sampling biases</li>
-                <li>Handling uncertainty: epistemic vs aleatoric</li>
+                <li><b>Imbalanced classes:</b> resampling, class weights and threshold tuning.</li>
+                <li><b>Sampling biases:</b> when the training sample misrepresents the population.</li>
+                <li><b>Uncertainty:</b> epistemic (reducible, model) vs aleatoric (irreducible, data noise).</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core metric · F1 (for imbalance)</span>
+                <span class="f-body">$F_1 = 2\cdot\dfrac{\text{precision}\cdot\text{recall}}{\text{precision}+\text{recall}}$
+                  <span class="desc">Harmonic mean of precision and recall — far more honest than accuracy when classes are skewed.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> on imbalanced data, accuracy lies; choose metrics and sampling that reflect the cost of each error type.</p>
               <div class="tags"><a class="tag demo" href="./index.html#cm">confusion matrix demo ↗</a></div>
+              <p class="tag-note"><b>Demo:</b> the confusion matrix shows how precision and recall trade off as the decision threshold moves.</p>
             </div>
 
             <div class="sess is-practice">
@@ -462,9 +672,10 @@
               <div class="s-title">Assignment review</div>
               <p class="s-obj">Dissection and discussion of sample solutions.</p>
               <ul class="topics">
-                <li>Walk-through of sample solutions</li>
-                <li>Exploration of the main difficulties encountered</li>
+                <li><b>Sample-solution walk-through:</b> what a strong submission looks like.</li>
+                <li><b>Common difficulties:</b> the recurring traps and how to avoid them.</li>
               </ul>
+              <p class="keyidea"><b>Key idea:</b> reviewing graded work against a reference solution is one of the fastest ways to internalise good practice.</p>
             </div>
 
             <div class="sess">
@@ -472,11 +683,18 @@
               <div class="s-title">ML integration — pipelines, ensemble methods, hyper-tuning</div>
               <p class="s-obj">Composing and optimising models for production.</p>
               <ul class="topics">
-                <li>Ensemble methods and pipelines of algorithms</li>
-                <li>Methods for hyper-parameter tuning</li>
-                <li>The future of AutoML; Bayesian optimization of parameters</li>
+                <li><b>Ensembles &amp; pipelines:</b> chaining transforms and combining many models.</li>
+                <li><b>Hyper-parameter tuning:</b> grid/random search and cross-validated selection.</li>
+                <li><b>AutoML &amp; Bayesian optimization</b> of parameters.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core idea · ensemble averaging</span>
+                <span class="f-body">$\hat{y} = \frac{1}{M}\sum_{m=1}^{M} f_m(x)$
+                  <span class="desc">Averaging $M$ diverse models reduces variance — the principle behind bagging and random forests.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> combining weak, diverse learners — and tuning them as one pipeline — usually beats hand-optimising a single model.</p>
               <div class="tags"><a class="tag demo" href="./index.html#bv">bias–variance demo ↗</a></div>
+              <p class="tag-note"><b>Demo:</b> bias–variance shows why ensembles help — averaging cuts variance without adding much bias.</p>
             </div>
 
             <div class="sess is-practice">
@@ -484,9 +702,10 @@
               <div class="s-title">A first practical overview of typical applications</div>
               <p class="s-obj">An end-to-end practical case of a business application.</p>
               <ul class="topics">
-                <li>Main concepts in play</li>
-                <li>General strategy for successful implementation</li>
+                <li><b>Main concepts in play</b> for a realistic deployment.</li>
+                <li><b>Implementation strategy</b> for a successful rollout.</li>
               </ul>
+              <p class="keyidea"><b>Key idea:</b> a working business application is a chain of decisions — data, model, metric, deployment — each of which can sink the whole.</p>
             </div>
 
           </div>
@@ -499,6 +718,17 @@
             <span class="mod-title">Model evaluation &amp; deployment</span>
             <span class="mod-meta">sessions 13–15</span>
           </div>
+          <p class="mod-intro">How do we know a model is actually good, and how do we keep it good once it
+            leaves the notebook? This block covers rigorous validation, the metric landscape, and the
+            realities of deployment and drift.</p>
+          <div class="outcomes">
+            <div class="oc-head">By the end of Module IV you should be able to</div>
+            <ul>
+              <li>Choose and run cross-validation strategies and read the bias–variance tradeoff.</li>
+              <li>Select metrics across supervised/unsupervised tasks and multi-class/multi-label settings.</li>
+              <li>Describe the model life-cycle and detect data and concept drift after deployment.</li>
+            </ul>
+          </div>
           <div class="timeline">
 
             <div class="sess">
@@ -506,15 +736,22 @@
               <div class="s-title">Model evaluation</div>
               <p class="s-obj">An extended analysis of validation methods.</p>
               <ul class="topics">
-                <li>Cross-validation, leave-one-out and their cases of use</li>
-                <li>Performance metrics and consistency</li>
-                <li>Bias–variance tradeoffs</li>
+                <li><b>Cross-validation &amp; leave-one-out:</b> reusing data to estimate generalization.</li>
+                <li><b>Consistency:</b> stable performance across folds.</li>
+                <li><b>Bias–variance tradeoff:</b> underfit vs overfit.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core decomposition · bias–variance</span>
+                <span class="f-body">$\mathbb{E}\big[(y-\hat{f}(x))^2\big] = \text{Bias}^2 + \text{Var} + \sigma^2$
+                  <span class="desc">Expected error splits into bias, variance, and irreducible noise $\sigma^2$ — the lens for diagnosing models.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> k-fold CV averages over many train/test splits, giving a less optimistic, lower-variance estimate of true performance.</p>
               <div class="tags">
                 <span class="tag read">ML Engineering · Ch.7 Model Evaluation</span>
                 <a class="tag demo" href="./index.html#bv">bias–variance demo ↗</a>
                 <a class="tag demo" href="./index.html#split">train/test demo ↗</a>
               </div>
+              <p class="tag-note"><b>Reading:</b> Burkov Ch.7 (Model Evaluation). <b>Demos:</b> bias–variance and train/test split make the decomposition tangible.</p>
             </div>
 
             <div class="sess">
@@ -522,14 +759,21 @@
               <div class="s-title">Performance metrics</div>
               <p class="s-obj">Review and comparison of performance metrics across paradigms.</p>
               <ul class="topics">
-                <li>Supervised vs unsupervised metrics</li>
-                <li>Accuracy, F-alpha score, sensitivity and specificity</li>
-                <li>Generalization to multi-class and multi-label classification</li>
+                <li><b>Supervised vs unsupervised</b> metrics.</li>
+                <li><b>Accuracy, F-alpha, sensitivity &amp; specificity.</b></li>
+                <li><b>Multi-class &amp; multi-label</b> generalization.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formula · F-beta score</span>
+                <span class="f-body">$F_\beta = (1+\beta^2)\cdot\dfrac{\text{precision}\cdot\text{recall}}{\beta^2\,\text{precision}+\text{recall}}$
+                  <span class="desc">$\beta$ weights recall over precision; sensitivity = recall = $\tfrac{\text{TP}}{\text{TP}+\text{FN}}$, specificity = $\tfrac{\text{TN}}{\text{TN}+\text{FP}}$.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> there is no universal metric — the right one encodes the relative cost of false positives vs false negatives for your problem.</p>
               <div class="tags">
                 <a class="tag demo" href="./index.html#cm">confusion matrix demo ↗</a>
                 <a class="tag demo" href="./index.html#roc">ROC / AUC demo ↗</a>
               </div>
+              <p class="tag-note"><b>Demos:</b> confusion matrix for threshold-level metrics; ROC/AUC for threshold-independent ranking quality.</p>
             </div>
 
             <div class="sess">
@@ -537,10 +781,17 @@
               <div class="s-title">Model deployment &amp; maintenance — an introduction / overview</div>
               <p class="s-obj">Taking a model beyond the notebook and keeping it healthy.</p>
               <ul class="topics">
-                <li>The model life-cycle</li>
-                <li>Data drift and concept drift</li>
+                <li><b>Model life-cycle:</b> from serving to retraining and retirement.</li>
+                <li><b>Data drift &amp; concept drift:</b> when the world shifts under a trained model.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core idea · drift detection</span>
+                <span class="f-body">$D_{\text{KL}}(P_{\text{train}} \,\|\, P_{\text{live}}) > \tau$
+                  <span class="desc">Flag drift when the live data distribution diverges from training beyond a threshold $\tau$.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> a deployed model is a living system — performance decays as distributions drift, so monitoring is part of the design.</p>
               <div class="tags"><span class="tag read">ML Engineering · Ch.8–9 Deployment, Serving, Monitoring &amp; Maintenance</span></div>
+              <p class="tag-note"><b>Reading:</b> Burkov Ch.8 (Model Deployment) &amp; Ch.9 (Serving, Monitoring &amp; Maintenance).</p>
             </div>
 
           </div>
@@ -553,6 +804,18 @@
             <span class="mod-title">Neural networks &amp; deep learning</span>
             <span class="mod-meta">sessions 16–19</span>
           </div>
+          <p class="mod-intro">The deep-learning block builds the neural network from the perceptron up:
+            forward and backward passes, optimisation and regularization, representation learning, and a first
+            look at agents that learn from reward.</p>
+          <div class="outcomes">
+            <div class="oc-head">By the end of Module V you should be able to</div>
+            <ul>
+              <li>Explain forward/backward propagation and how automatic differentiation computes gradients.</li>
+              <li>Apply activation functions, optimizers and regularizers like dropout.</li>
+              <li>Reason about representation learning and well-known architectures.</li>
+              <li>State the RL problem and the Bellman optimality equation at an introductory level.</li>
+            </ul>
+          </div>
           <div class="timeline">
 
             <div class="sess">
@@ -560,12 +823,19 @@
               <div class="s-title">Neural networks &amp; deep learning</div>
               <p class="s-obj">Introduction to the perceptron and multi-layer perceptron.</p>
               <ul class="topics">
-                <li>Inner workings and mathematical foundation of a neural network</li>
-                <li>Forward and backward propagation; automatic differentiation</li>
-                <li>Gradient descent and its adaptive variants; main hyperparameters</li>
-                <li>Dropout and other regularization techniques</li>
+                <li><b>Mathematical foundation</b> of a neural network.</li>
+                <li><b>Forward &amp; backward propagation;</b> automatic differentiation.</li>
+                <li><b>Gradient descent variants</b> (momentum, Adam) and key hyperparameters.</li>
+                <li><b>Dropout</b> and other regularization techniques.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formulas · neuron &amp; sigmoid</span>
+                <span class="f-body">$a = \sigma(w^\top x + b),\qquad \sigma(z) = \dfrac{1}{1+e^{-z}}$
+                  <span class="desc">A neuron is a weighted sum passed through a non-linearity; backprop applies the chain rule to get $\partial L/\partial w$.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> depth + non-linear activations let networks compose simple functions into rich ones; backprop makes training them tractable.</p>
               <div class="tags"><a class="tag demo" href="./index.html#gd">gradient descent demo ↗</a></div>
+              <p class="tag-note"><b>Demo:</b> gradient descent is exactly the optimiser that trains these networks, one weight update at a time.</p>
             </div>
 
             <div class="sess">
@@ -573,11 +843,18 @@
               <div class="s-title">Neural networks — representation learning</div>
               <p class="s-obj">How networks learn useful representations of data.</p>
               <ul class="topics">
-                <li>Representation-learning techniques explained through practical examples</li>
-                <li>Representational models</li>
-                <li>Typical well-known architectures and their uses</li>
+                <li><b>Representation-learning</b> through practical examples.</li>
+                <li><b>Representational models</b> and learned embeddings.</li>
+                <li><b>Well-known architectures</b> (CNNs, RNNs, transformers) and their uses.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core idea · learned embedding</span>
+                <span class="f-body">$h = g_\phi(x) \in \mathbb{R}^d,\quad d \ll \dim(x)$
+                  <span class="desc">Hidden layers map raw input into a compact feature space $h$ where the task becomes easy — features are learned, not hand-built.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> deep learning's power is automatic feature engineering — the network discovers the representation that PCA only approximates linearly.</p>
               <div class="tags"><a class="tag demo" href="./index.html#pca">PCA demo ↗</a></div>
+              <p class="tag-note"><b>Demo:</b> PCA as a linear baseline for the non-linear representations a network learns.</p>
             </div>
 
             <div class="sess is-practice">
@@ -585,11 +862,18 @@
               <div class="s-title">Practice recap</div>
               <p class="s-obj">How to code a neural network from the building blocks.</p>
               <ul class="topics">
-                <li>Basic concepts: tensors and gradient tapes</li>
-                <li>Activation functions and optimizers</li>
-                <li>General design principles</li>
+                <li><b>Tensors &amp; gradient tapes:</b> the core abstractions in TensorFlow/PyTorch.</li>
+                <li><b>Activations &amp; optimizers:</b> assembling a trainable model.</li>
+                <li><b>Design principles</b> for layer/width/depth choices.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formula · ReLU activation</span>
+                <span class="f-body">$\text{ReLU}(z) = \max(0, z)$
+                  <span class="desc">The default hidden activation — cheap, non-saturating, and the reason deep nets train well.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> a "gradient tape" records operations so the framework can autodiff the loss — you specify the forward pass, it gives you the gradients.</p>
               <div class="tags"><span class="tag assign">Assignment (70 pts)</span></div>
+              <p class="tag-note"><b>Assignment (70 pts):</b> implement and train a neural network in a notebook (tensors, optimizer, activations) and analyse the results.</p>
             </div>
 
             <div class="sess">
@@ -597,10 +881,16 @@
               <div class="s-title">Reinforcement learning — an introductory overview</div>
               <p class="s-obj">Intelligent agents that learn from the state-action-reward paradigm.</p>
               <ul class="topics">
-                <li>Temporal differences and the Bellman optimality equation</li>
-                <li>From iterative value-function optimization to policy-gradient algorithms</li>
-                <li>Analysis of a practical example case of use</li>
+                <li><b>Temporal differences</b> and the <b>Bellman optimality equation.</b></li>
+                <li>From <b>value-function</b> iteration to <b>policy-gradient</b> algorithms.</li>
+                <li><b>A practical example case</b> of use.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formula · Bellman optimality</span>
+                <span class="f-body">$Q^*(s,a) = \mathbb{E}\big[r + \gamma \max_{a'} Q^*(s',a')\big]$
+                  <span class="desc">The optimal action-value is the immediate reward plus the discounted ($\gamma$) best future value.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> RL replaces a labelled dataset with a reward signal — the agent learns by acting and observing consequences over time.</p>
             </div>
 
           </div>
@@ -613,6 +903,18 @@
             <span class="mod-title">Frontiers, applications &amp; assessment</span>
             <span class="mod-meta">sessions 20–30</span>
           </div>
+          <p class="mod-intro">The closing block surveys the research frontier — sequential models, transfer
+            and contrastive learning, generative models — then consolidates best practice, examines real-world
+            risks, and runs the final assessment and group presentations.</p>
+          <div class="outcomes">
+            <div class="oc-head">By the end of Module VI you should be able to</div>
+            <ul>
+              <li>Model sequential/time-series data and explain the move from classical methods to deep models.</li>
+              <li>Use transfer, fine-tuning and contrastive learning to reuse knowledge across tasks.</li>
+              <li>Reason about generative models (GANs, diffusion) and about explainability and risk.</li>
+              <li>Deliver and present an end-to-end ML business project.</li>
+            </ul>
+          </div>
           <div class="timeline">
 
             <div class="sess">
@@ -620,10 +922,16 @@
               <div class="s-title">Sequential modeling — from time-series analysis to deep NN models</div>
               <p class="s-obj">Modeling data where order and time matter.</p>
               <ul class="topics">
-                <li>Specific issues in time/sequential-data feature engineering</li>
-                <li>Basic techniques involved</li>
-                <li>Example-based analysis of sequential-modeling approaches and their evolution</li>
+                <li><b>Sequential feature engineering:</b> lags, windows, seasonality.</li>
+                <li><b>Basic techniques</b> and their evolution toward deep models.</li>
+                <li><b>Example-based</b> comparison of approaches.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core idea · recurrent state</span>
+                <span class="f-body">$h_t = f(h_{t-1}, x_t)$
+                  <span class="desc">A hidden state carries information forward in time — the basis of AR models, RNNs, LSTMs and beyond.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> sequence models exploit temporal dependence that i.i.d. methods throw away — order is information.</p>
             </div>
 
             <div class="sess">
@@ -631,10 +939,16 @@
               <div class="s-title">Transfer learning &amp; contrastive learning — theoretical basis and principles</div>
               <p class="s-obj">Reusing learned knowledge across tasks.</p>
               <ul class="topics">
-                <li>Shallow training: principles and concepts</li>
-                <li>Introduction to basic fine-tuning techniques</li>
-                <li>Perspectives for transfer learning and multi-task learning</li>
+                <li><b>Shallow training:</b> principles and concepts.</li>
+                <li><b>Fine-tuning</b> a pretrained model on a new task.</li>
+                <li><b>Multi-task &amp; transfer</b> perspectives.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core idea · fine-tuning</span>
+                <span class="f-body">$\theta_{\text{new}} = \theta_{\text{pretrained}} - \eta\,\nabla_\theta L_{\text{target}}(\theta)$
+                  <span class="desc">Start from weights learned on a large source task and adapt them with a few gradient steps on the target task.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> representations learned on huge datasets transfer — fine-tuning beats training from scratch when target data is scarce.</p>
             </div>
 
             <div class="sess is-practice">
@@ -642,11 +956,18 @@
               <div class="s-title">Summarizing ML best practices — some problems and solutions</div>
               <p class="s-obj">Applying the solutions explored to different types of problems.</p>
               <ul class="topics">
-                <li>Explainability and interpretability</li>
-                <li>End-to-end practical case analysis</li>
-                <li>ML/DL business-function application</li>
+                <li><b>Explainability &amp; interpretability:</b> understanding why a model predicts what it does.</li>
+                <li><b>End-to-end case analysis.</b></li>
+                <li><b>ML/DL business-function application.</b></li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core idea · feature attribution</span>
+                <span class="f-body">$\hat{f}(x) \approx \phi_0 + \sum_{j} \phi_j$
+                  <span class="desc">Explainability methods (e.g. Shapley values) attribute a prediction to additive per-feature contributions $\phi_j$.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> in business, an unexplainable model is often an unusable one — interpretability is a deployment requirement, not a luxury.</p>
               <div class="tags"><span class="tag assign">Group Assignment (70 pts)</span></div>
+              <p class="tag-note"><b>Group assignment (70 pts):</b> launch the final group project — apply the full pipeline to a business problem with explainability in focus.</p>
             </div>
 
             <div class="sess is-practice">
@@ -654,11 +975,18 @@
               <div class="s-title">Deep generative models</div>
               <p class="s-obj">Exploration of some of the novel architectures in this field.</p>
               <ul class="topics">
-                <li>Contrastive learning, cross-embeddings and their new applications</li>
-                <li>Text-to-image and text-to-video</li>
-                <li>A brief analysis of Generative Adversarial Networks and Diffusion Models</li>
+                <li><b>Contrastive learning &amp; cross-embeddings</b> and their applications.</li>
+                <li><b>Text-to-image and text-to-video.</b></li>
+                <li><b>GANs &amp; diffusion models</b> — a brief analysis.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core formula · GAN minimax objective</span>
+                <span class="f-body">$\min_G \max_D \; \mathbb{E}_{x}[\log D(x)] + \mathbb{E}_{z}[\log(1-D(G(z)))]$
+                  <span class="desc">A generator $G$ and discriminator $D$ play an adversarial game; diffusion models instead learn to reverse a noising process.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> generative models learn the data distribution itself, enabling synthesis — a different goal from the discriminative models of earlier modules.</p>
               <div class="tags"><span class="tag assign">Examination practice (40 pts)</span></div>
+              <p class="tag-note"><b>Examination practice (40 pts):</b> a "test-exam" assignment — scored on number attempted, average result and improvement; primes you for the formal exam format.</p>
             </div>
 
             <div class="sess is-practice">
@@ -666,8 +994,9 @@
               <div class="s-title">Advanced practice</div>
               <p class="s-obj">Advanced practice recap consolidating the deep-learning material.</p>
               <ul class="topics">
-                <li>Recap and reinforcement of advanced practical techniques</li>
+                <li><b>Recap &amp; reinforcement</b> of advanced practical techniques.</li>
               </ul>
+              <p class="keyidea"><b>Key idea:</b> deliberate, repeated practice on harder cases is what converts familiarity into fluency.</p>
             </div>
 
             <div class="sess">
@@ -675,8 +1004,9 @@
               <div class="s-title">Applied machine learning — the industry view</div>
               <p class="s-obj">A high-level exploration of business cases and applications.</p>
               <ul class="topics">
-                <li>Applications across different industries</li>
+                <li><b>Applications across industries</b> (finance, healthcare, education, more).</li>
               </ul>
+              <p class="keyidea"><b>Key idea:</b> the same handful of algorithms recur across industries — what changes is the data, the metric, and the cost of being wrong.</p>
             </div>
 
             <div class="sess is-practice">
@@ -684,9 +1014,10 @@
               <div class="s-title">Extended practice — case review</div>
               <p class="s-obj">Dissection and discussion of sample solutions.</p>
               <ul class="topics">
-                <li>Walk-through of sample solutions</li>
-                <li>Exploration of the main difficulties</li>
+                <li><b>Sample-solution walk-through.</b></li>
+                <li><b>Main difficulties</b> and how to overcome them.</li>
               </ul>
+              <p class="keyidea"><b>Key idea:</b> a second structured review, now on advanced material, to lock in the deep-learning workflow before assessment.</p>
             </div>
 
             <div class="sess">
@@ -694,10 +1025,17 @@
               <div class="s-title">Real-world business applications — challenges, risks &amp; steps ahead</div>
               <p class="s-obj">Where the field is heading and what could go wrong.</p>
               <ul class="topics">
-                <li>Analysis of current research and expected breakthroughs</li>
-                <li>Summary of risks: from adversarial attacks to mesa-optimization disalignment</li>
+                <li><b>Current research</b> and expected breakthroughs.</li>
+                <li><b>Risks:</b> from adversarial attacks to mesa-optimization misalignment.</li>
               </ul>
+              <div class="formula">
+                <span class="f-lbl">Core idea · adversarial perturbation</span>
+                <span class="f-body">$x_{\text{adv}} = x + \epsilon\,\operatorname{sign}\!\big(\nabla_x L(x,y)\big)$
+                  <span class="desc">A tiny, gradient-aligned perturbation can flip a model's prediction — a core safety/security risk.</span></span>
+              </div>
+              <p class="keyidea"><b>Key idea:</b> capability and risk grow together; responsible deployment means anticipating attacks, drift and misalignment.</p>
               <div class="tags"><span class="tag read">ML Engineering · Ch.10 Conclusion</span></div>
+              <p class="tag-note"><b>Reading:</b> Burkov Ch.10 (Conclusion) — where ML engineering is heading.</p>
             </div>
 
             <div class="sess is-practice">
@@ -705,10 +1043,12 @@
               <div class="s-title">Test / exam</div>
               <p class="s-obj">Concept-summary review examination.</p>
               <ul class="topics">
-                <li>Not a final exam — its score is added to the other evaluation items</li>
-                <li>No minimum passing grade required</li>
+                <li><b>Not a final exam</b> — its score is added to the other evaluation items.</li>
+                <li><b>No minimum passing grade</b> required; most questions reused from the practice test-exams.</li>
               </ul>
+              <p class="keyidea"><b>Key idea:</b> the formal test rewards consistent practice — questions are drawn largely from the test-exams you have already rehearsed.</p>
               <div class="tags"><span class="tag assign">Test / Exam (180 pts)</span></div>
+              <p class="tag-note"><b>Test / exam (180 pts):</b> written in class, no GenAI; the single largest point item, feeding the 30% final-exam weight.</p>
             </div>
 
             <div class="sess is-practice">
@@ -716,9 +1056,11 @@
               <div class="s-title">Group projects — presentations (A)</div>
               <p class="s-obj">Presentations, discussion and Q&amp;A of group projects.</p>
               <ul class="topics">
-                <li>First round of group-project presentations</li>
+                <li><b>First round</b> of group-project presentations.</li>
               </ul>
+              <p class="keyidea"><b>Key idea:</b> presenting work clearly is itself a graded ML-manager skill — the syllabus weights communication explicitly.</p>
               <div class="tags"><span class="tag assign">Group Presentation (50 pts)</span></div>
+              <p class="tag-note"><b>Group presentation (50 pts):</b> present the project with live discussion and Q&amp;A; feeds the 8% presentation weight.</p>
             </div>
 
             <div class="sess is-practice">
@@ -726,20 +1068,58 @@
               <div class="s-title">Group projects — presentations (B) · wrap-up</div>
               <p class="s-obj">Final presentations and course wrap-up.</p>
               <ul class="topics">
-                <li>Second round of group-project presentations, discussion and Q&amp;A</li>
-                <li>Course wrap-up</li>
+                <li><b>Second round</b> of group-project presentations, discussion and Q&amp;A.</li>
+                <li><b>Course wrap-up</b> and synthesis.</li>
               </ul>
+              <p class="keyidea"><b>Key idea:</b> the wrap-up ties the 30 sessions back to the single thread — turning data into reliable, accountable decisions.</p>
             </div>
 
           </div>
         </div>
       </section>
 
+      <!-- KEY CONCEPTS / GLOSSARY -------------------------------------- -->
+      <section class="demo" id="glossary">
+        <h2>Key concepts — glossary</h2>
+        <p class="cap">A compact reference for the terms and formulas that recur across the program. Each entry
+          pairs a one-line definition with the symbol or expression used in the sessions above.</p>
+        <dl class="glossary">
+          <div class="term"><dt>Supervised learning</dt><dd>Fitting $f_\theta:\mathcal{X}\to\mathcal{Y}$ from labelled pairs $(x_i,y_i)$ to predict labels on new inputs.</dd></div>
+          <div class="term"><dt>Unsupervised learning</dt><dd>Finding structure (clusters, low-dim factors) in data with no labels.</dd></div>
+          <div class="term"><dt>Reinforcement learning</dt><dd>An agent learns a policy by maximising cumulative reward through interaction with an environment.</dd></div>
+          <div class="term"><dt>Loss function <span class="mq">$L$</span></dt><dd>A scalar measuring prediction error; training minimises its average over the data.</dd></div>
+          <div class="term"><dt>Empirical risk</dt><dd>The average loss on the training set, $\frac{1}{n}\sum_i L(y_i,f_\theta(x_i))$ — the quantity optimisers descend.</dd></div>
+          <div class="term"><dt>Gradient descent</dt><dd>Iterative update $\theta \leftarrow \theta - \eta\nabla L$ that moves parameters downhill on the loss.</dd></div>
+          <div class="term"><dt>Learning rate <span class="mq">$\eta$</span></dt><dd>Step size in gradient descent; too large diverges, too small crawls.</dd></div>
+          <div class="term"><dt>Overfitting</dt><dd>Modelling noise in the training data so that test performance suffers.</dd></div>
+          <div class="term"><dt>Generalization</dt><dd>How well a model performs on unseen data drawn from the same distribution.</dd></div>
+          <div class="term"><dt>Bias–variance tradeoff</dt><dd>Error decomposes into bias (underfit), variance (overfit) and irreducible noise.</dd></div>
+          <div class="term"><dt>Cross-validation</dt><dd>Estimating generalization by rotating which data folds serve as train vs validation.</dd></div>
+          <div class="term"><dt>Regularization</dt><dd>Penalising model complexity (e.g. $L_2$, dropout) to curb variance and overfitting.</dd></div>
+          <div class="term"><dt>Feature engineering</dt><dd>Creating, transforming and selecting input variables to make patterns learnable.</dd></div>
+          <div class="term"><dt>One-hot encoding</dt><dd>Representing a categorical value as a binary indicator vector.</dd></div>
+          <div class="term"><dt>Data leakage</dt><dd>Target information sneaking into features, inflating offline scores that then collapse live.</dd></div>
+          <div class="term"><dt>PCA</dt><dd>Linear dimensionality reduction onto directions of maximum variance (top eigenvectors of $\Sigma$).</dd></div>
+          <div class="term"><dt>k-means</dt><dd>Clustering that minimises within-cluster squared distance to $K$ centroids.</dd></div>
+          <div class="term"><dt>Cross-entropy <span class="mq">$\mathcal{L}_{\text{CE}}$</span></dt><dd>The standard classification loss, $-\sum y\log\hat{p}$, measuring probabilistic mismatch.</dd></div>
+          <div class="term"><dt>Precision / recall</dt><dd>Correctness among predicted positives vs coverage of actual positives; combined by $F_\beta$.</dd></div>
+          <div class="term"><dt>ROC / AUC</dt><dd>Curve of true- vs false-positive rate across thresholds; AUC summarises ranking quality.</dd></div>
+          <div class="term"><dt>Ensemble</dt><dd>Combining multiple models (bagging, boosting, stacking) to reduce error.</dd></div>
+          <div class="term"><dt>Hyper-parameter</dt><dd>A setting fixed before training (e.g. depth, $\eta$, $K$), tuned by search or Bayesian optimization.</dd></div>
+          <div class="term"><dt>Backpropagation</dt><dd>The chain rule applied through a network to compute loss gradients efficiently.</dd></div>
+          <div class="term"><dt>Activation function</dt><dd>Element-wise non-linearity (sigmoid, ReLU) that gives networks expressive power.</dd></div>
+          <div class="term"><dt>Concept / data drift</dt><dd>Shift in the input or target distribution after deployment, degrading a live model.</dd></div>
+          <div class="term"><dt>Transfer learning</dt><dd>Reusing a model pretrained on one task by fine-tuning it on a related target task.</dd></div>
+          <div class="term"><dt>Generative model</dt><dd>A model of the data distribution that can synthesise new samples (GANs, diffusion).</dd></div>
+          <div class="term"><dt>Epistemic vs aleatoric</dt><dd>Reducible model uncertainty vs irreducible noise inherent in the data.</dd></div>
+        </dl>
+      </section>
+
       <!-- BIBLIOGRAPHY ------------------------------------------------ -->
       <section class="demo" id="biblio">
         <h2>Bibliography</h2>
         <p class="cap">The program follows one applied text as its backbone, with a concise companion for quick
-          reference.</p>
+          reference. Each entry is annotated with what it offers and which sessions draw on it.</p>
         <div class="biblio">
           <div class="ref">
             <div class="b-tag">Compulsory</div>
@@ -748,6 +1128,10 @@
             <p class="b-note">The most complete applied AI book out there — filled with best practices and design
               patterns for building reliable, scaling ML solutions. Burkov holds a Ph.D. in AI and led a machine-learning
               team at Gartner; the book draws on 15 years of solving problems with AI.</p>
+            <p class="b-map">Maps to: <span class="mono">Ch.1 → S1</span> · <span class="mono">Ch.2 → S2</span> ·
+              <span class="mono">Ch.3 → S3</span> · <span class="mono">Ch.4 → S4</span> ·
+              <span class="mono">Ch.5–6 → S6</span> · <span class="mono">Ch.7 → S13</span> ·
+              <span class="mono">Ch.8–9 → S15</span> · <span class="mono">Ch.10 → S27</span>.</p>
           </div>
           <div class="ref">
             <div class="b-tag">Recommended</div>
@@ -755,6 +1139,8 @@
               ISBN 1-9995795-0-X (Digital).</p>
             <p class="b-note">A successful effort to reduce all of machine learning to 100 pages — well-chosen
               topics across theory and practice, a solid introduction for practitioners.</p>
+            <p class="b-map">Maps to: a concise companion for the algorithm and training material of
+              <span class="mono">Modules II–V</span> (S5–S19) — useful quick reference before assignments.</p>
           </div>
         </div>
         <p class="bar-note">Professor <span class="prof-name">José Manuel Rey González</span> ·
