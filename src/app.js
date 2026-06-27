@@ -14,6 +14,38 @@
 // Animated demos use requestAnimationFrame with play/pause/reset and tear
 // down the frame on reset. KaTeX renders the math in the captions.
 // ============================================================
+//
+// The framework-free ML cores live in the sibling modules under src/ and are
+// unit-tested with `node --test` (see test/). This file imports them and is
+// responsible only for reading controls, driving the demos and rendering.
+
+import { mulberry32, gauss } from './rng.js';
+import { trainTestSplit } from './split.js';
+import {
+  mseLoss,
+  gradientDescentStep,
+  polyfit,
+  evalPoly,
+  rmse,
+} from './linreg.js';
+import { sigmoid, logisticStep, logisticMetrics } from './logreg.js';
+import { classify as knnClassify, looAccuracy } from './knn.js';
+import {
+  assignStep,
+  updateStep,
+  inertia as kmInertia,
+} from './kmeans.js';
+import { gini, buildTree } from './tree.js';
+import { columnStats, standardize, minMax } from './scaling.js';
+import {
+  confusionFromScores,
+  accuracy as cmAccuracy,
+  precision as cmPrecision,
+  recall as cmRecall,
+  f1 as cmF1,
+  rocAuc,
+} from './metrics.js';
+import { pca as pcaFit } from './pca.js';
 
 // ---------- helpers ------------------------------------------------------
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -56,22 +88,8 @@ function ptr(cv, ev) {
   const r = cv.getBoundingClientRect();
   return { x: ev.clientX - r.left, y: ev.clientY - r.top };
 }
-// small seedable RNG so "new sample" buttons give reproducible-but-varied data
-function mulberry32(a) {
-  return function () {
-    a |= 0; a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-// Box–Muller standard normal from a uniform generator
-function gauss(rng) {
-  let u = 0, v = 0;
-  while (u === 0) u = rng();
-  while (v === 0) v = rng();
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-}
+// (mulberry32 + gauss are imported from ./rng.js — the same seedable RNG the
+//  "new sample" buttons use to give reproducible-but-varied data.)
 
 // ============================================================
 // 1. TRAIN/TEST SPLIT & OVERFITTING — polynomial least squares
@@ -91,49 +109,12 @@ function gauss(rng) {
       const y = truth(x) + gauss(rng) * sigma;
       pts.push({ x, y, test: false });
     }
-    // assign test/train by train fraction
+    // partition into train/test reproducibly (seeded by the demo seed)
     const frac = n('sp-f', 60) / 100;
-    pts.forEach(p => { p.test = rng() > frac; });
-    if (pts.every(p => !p.test)) pts[0].test = true;
-    if (pts.every(p => p.test)) pts[0].test = false;
+    const { test } = trainTestSplit(pts.length, { trainFraction: frac, seed });
+    const testSet = new Set(test);
+    pts.forEach((p, i) => { p.test = testSet.has(i); });
   }
-
-  // least-squares polynomial fit via normal equations on a Vandermonde basis
-  function polyfit(data, deg) {
-    const m = deg + 1;
-    const A = Array.from({ length: m }, () => new Array(m).fill(0));
-    const bv = new Array(m).fill(0);
-    data.forEach(({ x, y }) => {
-      const pw = [1];
-      for (let k = 1; k < 2 * deg + 1; k++) pw.push(pw[k - 1] * x);
-      for (let i = 0; i < m; i++) {
-        bv[i] += pw[i] * y;
-        for (let j = 0; j < m; j++) A[i][j] += pw[i + j];
-      }
-    });
-    return solve(A, bv);
-  }
-  // Gaussian elimination with partial pivoting
-  function solve(A, b) {
-    const m = b.length;
-    const M = A.map((r, i) => [...r, b[i]]);
-    for (let c = 0; c < m; c++) {
-      let piv = c;
-      for (let r = c + 1; r < m; r++) if (Math.abs(M[r][c]) > Math.abs(M[piv][c])) piv = r;
-      [M[c], M[piv]] = [M[piv], M[c]];
-      if (Math.abs(M[c][c]) < 1e-12) M[c][c] = 1e-12;
-      for (let r = 0; r < m; r++) {
-        if (r === c) continue;
-        const f = M[r][c] / M[c][c];
-        for (let k = c; k <= m; k++) M[r][k] -= f * M[c][k];
-      }
-    }
-    const out = [];
-    for (let i = 0; i < m; i++) out.push(M[i][m] / M[i][i]);
-    return out;
-  }
-  const evalPoly = (co, x) => { let s = 0, p = 1; for (let i = 0; i < co.length; i++) { s += co[i] * p; p *= x; } return s; };
-  const rmse = (data, co) => Math.sqrt(data.reduce((a, p) => a + (evalPoly(co, p.x) - p.y) ** 2, 0) / Math.max(1, data.length));
 
   function draw() {
     const { ctx, w, h } = fitCanvas(cv);
@@ -182,7 +163,8 @@ function gauss(rng) {
     else { verdict = 'good fit'; col = GOOD; }
     setText('sp-v', verdict); $('sp-v').style.color = col;
   }
-  ['sp-d', 'sp-f'].forEach(id => $(id).addEventListener('input', draw));
+  $('sp-d').addEventListener('input', draw);
+  $('sp-f').addEventListener('input', () => { regen(); draw(); });
   $('sp-n').addEventListener('input', () => { regen(); draw(); });
   $('sp-new').addEventListener('click', () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; regen(); draw(); });
   window.addEventListener('resize', draw);
@@ -205,13 +187,10 @@ function gauss(rng) {
   })();
   let w = 0, b = 0, it = 0, raf = null;
 
-  function lossAt(w, b) { return data.reduce((a, p) => a + (w * p.x + b - p.y) ** 2, 0) / data.length; }
+  const lossAt = (w, b) => mseLoss(data, w, b);
   function stepOnce() {
     const eta = n('gd-l', 50) / 1000; // 0.001 .. 0.12
-    let gw = 0, gb = 0;
-    data.forEach(p => { const e = w * p.x + b - p.y; gw += 2 * e * p.x; gb += 2 * e; });
-    gw /= data.length; gb /= data.length;
-    w -= eta * gw; b -= eta * gb; it++;
+    ({ w, b } = gradientDescentStep(data, w, b, eta)); it++;
     // guard against divergence blowing up the canvas
     if (!Number.isFinite(w) || Math.abs(w) > 1e6) { w = 0; b = 0; }
   }
@@ -333,20 +312,12 @@ function gauss(rng) {
       raw.push({ x: 50 + gauss(rng) * 18, y: 5 + gauss(rng) * 1.2 });
     }
   }
-  function stats(arr, key) {
-    const m = arr.reduce((a, p) => a + p[key], 0) / arr.length;
-    const sd = Math.sqrt(arr.reduce((a, p) => a + (p[key] - m) ** 2, 0) / arr.length);
-    const lo = Math.min(...arr.map(p => p[key])), hi = Math.max(...arr.map(p => p[key]));
-    return { m, sd, lo, hi };
-  }
+  const stats = columnStats;
   function transform() {
     const mode = $('sc-m').value;
-    const sx = stats(raw, 'x'), sy = stats(raw, 'y');
-    return raw.map(p => {
-      if (mode === 'standard') return { x: (p.x - sx.m) / sx.sd, y: (p.y - sy.m) / sy.sd };
-      if (mode === 'minmax') return { x: (p.x - sx.lo) / (sx.hi - sx.lo), y: (p.y - sy.lo) / (sy.hi - sy.lo) };
-      return { x: p.x, y: p.y };
-    });
+    if (mode === 'standard') return standardize(raw);
+    if (mode === 'minmax') return minMax(raw);
+    return raw.map(p => ({ x: p.x, y: p.y }));
   }
   function draw() {
     const { ctx, w, h } = fitCanvas(cv);
@@ -397,13 +368,7 @@ function gauss(rng) {
     train.forEach(p => { p.x = clamp(p.x, 0.02, 0.98); p.y = clamp(p.y, 0.02, 0.98); });
     query = null;
   }
-  function classify(x, y, k) {
-    const d = train.map(p => ({ d: (p.x - x) ** 2 + (p.y - y) ** 2, c: p.c }));
-    d.sort((a, b) => a.d - b.d);
-    let v0 = 0, v1 = 0;
-    for (let i = 0; i < Math.min(k, d.length); i++) (d[i].c === 0 ? v0++ : v1++);
-    return { cls: v1 > v0 ? 1 : 0, v0, v1 };
-  }
+  const classify = (x, y, k) => knnClassify(train, x, y, k);
   function draw() {
     const { ctx, w, h } = fitCanvas(cv);
     ctx.clearRect(0, 0, w, h);
@@ -444,16 +409,8 @@ function gauss(rng) {
       ctx.strokeStyle = INK; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(X(query.x), Y(query.y), 7, 0, 7); ctx.fill(); ctx.stroke();
     }
-    // train accuracy (leave-one-out style: exclude self by checking k+1 then dropping nearest=self)
-    let correct = 0;
-    train.forEach(p => {
-      const d = train.map(q => ({ d: (q.x - p.x) ** 2 + (q.y - p.y) ** 2, c: q.c, self: q === p }));
-      d.sort((a, b) => a.d - b.d);
-      let v0 = 0, v1 = 0, used = 0;
-      for (let i = 0; i < d.length && used < k; i++) { if (d[i].self) continue; (d[i].c === 0 ? v0++ : v1++); used++; }
-      if ((v1 > v0 ? 1 : 0) === p.c) correct++;
-    });
-    setText('kn-acc', (100 * correct / train.length).toFixed(0) + '%');
+    // train accuracy (leave-one-out: each point classified by its k nearest others)
+    setText('kn-acc', (100 * looAccuracy(train, k)).toFixed(0) + '%');
     if (res) {
       setText('kn-cls', res.cls === 0 ? 'class A' : 'class B');
       $('kn-cls').style.color = res.cls === 0 ? ACCENT : WARN;
@@ -486,24 +443,12 @@ function gauss(rng) {
     data.forEach(p => { p.x = clamp(p.x, 0.02, 0.98); p.y = clamp(p.y, 0.02, 0.98); });
   })();
   let w1 = 0, w2 = 0, b = 0, ep = 0, raf = null;
-  const sig = z => 1 / (1 + Math.exp(-z));
-  function predict(p) { return sig(w1 * p.x + w2 * p.y + b); }
+  const sig = sigmoid;
   function stepEpoch() {
     const eta = n('lg-l', 30) / 100;
-    let g1 = 0, g2 = 0, gb = 0;
-    data.forEach(p => { const e = predict(p) - p.t; g1 += e * p.x; g2 += e * p.y; gb += e; });
-    const m = data.length;
-    w1 -= eta * g1 / m; w2 -= eta * g2 / m; b -= eta * gb / m; ep++;
+    ({ w1, w2, b } = logisticStep({ w1, w2, b }, data, eta)); ep++;
   }
-  function metrics() {
-    let loss = 0, correct = 0;
-    data.forEach(p => {
-      const yh = clamp(predict(p), 1e-9, 1 - 1e-9);
-      loss += -(p.t * Math.log(yh) + (1 - p.t) * Math.log(1 - yh));
-      if ((yh >= 0.5 ? 1 : 0) === p.t) correct++;
-    });
-    return { loss: loss / data.length, acc: correct / data.length };
-  }
+  const metrics = () => logisticMetrics({ w1, w2, b }, data);
   function draw() {
     const { ctx, w, h } = fitCanvas(cv);
     ctx.clearRect(0, 0, w, h);
@@ -566,41 +511,8 @@ function gauss(rng) {
       data.push({ x, y, c: c ^ flip });
     }
   }
-  const gini = pts => {
-    if (!pts.length) return 0;
-    const p1 = pts.filter(p => p.c === 1).length / pts.length;
-    return 1 - p1 * p1 - (1 - p1) * (1 - p1);
-  };
-  function bestSplit(pts) {
-    let best = null, bestGain = 1e-9;
-    const g0 = gini(pts);
-    ['x', 'y'].forEach(ax => {
-      const vals = [...new Set(pts.map(p => p[ax]))].sort((a, b) => a - b);
-      for (let i = 0; i < vals.length - 1; i++) {
-        const thr = (vals[i] + vals[i + 1]) / 2;
-        const L = pts.filter(p => p[ax] <= thr), R = pts.filter(p => p[ax] > thr);
-        if (!L.length || !R.length) continue;
-        const g = (L.length * gini(L) + R.length * gini(R)) / pts.length;
-        const gain = g0 - g;
-        if (gain > bestGain) { bestGain = gain; best = { ax, thr, L, R }; }
-      }
-    });
-    return best;
-  }
-  // build tree returning leaf boxes [{x0,x1,y0,y1,cls,pts}]
-  function build(pts, box, depth, maxD, out) {
-    const maj = pts.filter(p => p.c === 1).length >= pts.length / 2 ? 1 : 0;
-    if (depth >= maxD || gini(pts) < 1e-6 || pts.length < 3) { out.push({ ...box, cls: maj, pts }); return; }
-    const s = bestSplit(pts);
-    if (!s) { out.push({ ...box, cls: maj, pts }); return; }
-    if (s.ax === 'x') {
-      build(s.L, { ...box, x1: s.thr }, depth + 1, maxD, out);
-      build(s.R, { ...box, x0: s.thr }, depth + 1, maxD, out);
-    } else {
-      build(s.L, { ...box, y1: s.thr }, depth + 1, maxD, out);
-      build(s.R, { ...box, y0: s.thr }, depth + 1, maxD, out);
-    }
-  }
+  // gini, bestSplit and the recursive leaf builder come from ./tree.js
+  const build = buildTree;
   function draw() {
     const { ctx, w, h } = fitCanvas(cv);
     ctx.clearRect(0, 0, w, h);
@@ -658,28 +570,11 @@ function gauss(rng) {
     for (let i = 0; i < k; i++) cents.push({ x: rng(), y: rng() });
     assign = pts.map(() => -1); it = 0; moved = 0;
   }
-  function inertia() {
-    let s = 0; pts.forEach((p, i) => { const c = cents[assign[i]]; if (c) s += (p.x - c.x) ** 2 + (p.y - c.y) ** 2; });
-    return s;
-  }
+  const inertia = () => kmInertia(pts, cents, assign);
   function stepOnce() {
-    // assign
-    pts.forEach((p, i) => {
-      let bd = Infinity, bj = 0;
-      cents.forEach((c, j) => { const d = (p.x - c.x) ** 2 + (p.y - c.y) ** 2; if (d < bd) { bd = d; bj = j; } });
-      assign[i] = bj;
-    });
-    // update
-    moved = 0;
-    cents.forEach((c, j) => {
-      const mem = pts.filter((_, i) => assign[i] === j);
-      if (mem.length) {
-        const nx = mem.reduce((a, p) => a + p.x, 0) / mem.length;
-        const ny = mem.reduce((a, p) => a + p.y, 0) / mem.length;
-        moved += Math.hypot(nx - c.x, ny - c.y);
-        c.x = nx; c.y = ny;
-      }
-    });
+    assign = assignStep(pts, cents);          // assign each point to nearest centroid
+    const res = updateStep(pts, cents, assign); // move centroids to member means
+    cents = res.cents; moved = res.moved;
     it++;
   }
   function draw() {
@@ -743,29 +638,13 @@ function gauss(rng) {
       raw.push({ x: x * 0.9, y: y * 0.55 });
     }
   }
-  // 2x2 symmetric eigen-decomposition
-  function eig2(a, b, c) { // [[a,b],[b,c]]
-    const tr = a + c, det = a * c - b * b;
-    const disc = Math.sqrt(Math.max(0, tr * tr / 4 - det));
-    const l1 = tr / 2 + disc, l2 = tr / 2 - disc;
-    // eigenvector for l1
-    let vx, vy;
-    if (Math.abs(b) > 1e-9) { vx = l1 - c; vy = b; }
-    else { vx = 1; vy = 0; }
-    const nrm = Math.hypot(vx, vy) || 1;
-    return { l1, l2, v1: { x: vx / nrm, y: vy / nrm } };
-  }
   function draw() {
     const { ctx, w, h } = fitCanvas(cv);
     ctx.clearRect(0, 0, w, h);
     setText('pc-rv', (n('pc-r', 80) / 100).toFixed(2));
     if (!raw.length) regen();
-    const mx = raw.reduce((a, p) => a + p.x, 0) / raw.length;
-    const my = raw.reduce((a, p) => a + p.y, 0) / raw.length;
-    let cxx = 0, cyy = 0, cxy = 0;
-    raw.forEach(p => { cxx += (p.x - mx) ** 2; cyy += (p.y - my) ** 2; cxy += (p.x - mx) * (p.y - my); });
-    cxx /= raw.length; cyy /= raw.length; cxy /= raw.length;
-    const { l1, l2, v1 } = eig2(cxx, cxy, cyy);
+    // covariance eigen-decomposition from ./pca.js
+    const { mx, my, l1, l2, v1, v2, kept } = pcaFit(raw);
 
     const cx = w / 2, cy = h / 2, sc = Math.min(w, h) * 0.32 / 1.2;
     const X = x => cx + (x - mx) * sc, Y = y => cy - (y - my) * sc;
@@ -782,7 +661,6 @@ function gauss(rng) {
     }
     raw.forEach(p => { ctx.fillStyle = 'rgba(67,56,202,0.55)'; ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), 3.2, 0, 7); ctx.fill(); });
     // PC1 (solid) and PC2 (dashed), length ~ sqrt(eigenvalue)
-    const v2 = { x: -v1.y, y: v1.x };
     const drawAxis = (vec, lam, col, dash) => {
       const len = Math.sqrt(Math.max(lam, 1e-4)) * 2.2;
       ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.setLineDash(dash || []);
@@ -797,7 +675,6 @@ function gauss(rng) {
     ctx.fillText('PC1 (solid) · PC2 (dashed)', 14, 24);
 
     const ang = Math.atan2(v1.y, v1.x) * 180 / Math.PI;
-    const kept = l1 / (l1 + l2);
     setText('pc-eig', `${l1.toFixed(3)}, ${l2.toFixed(3)}`);
     setText('pc-ang', ang.toFixed(1) + '°');
     setText('pc-var', (100 * kept).toFixed(1) + '%');
@@ -821,17 +698,7 @@ function gauss(rng) {
     for (let i = 0; i < 60; i++) ex.push({ s: clamp(0.62 + gauss(rng) * 0.18, 0, 1), y: 1 });
     for (let i = 0; i < 60; i++) ex.push({ s: clamp(0.38 + gauss(rng) * 0.18, 0, 1), y: 0 });
   })();
-  function counts(thr) {
-    let tp = 0, fp = 0, fn = 0, tn = 0;
-    ex.forEach(e => {
-      const pred = e.s >= thr ? 1 : 0;
-      if (e.y === 1 && pred === 1) tp++;
-      else if (e.y === 0 && pred === 1) fp++;
-      else if (e.y === 1 && pred === 0) fn++;
-      else tn++;
-    });
-    return { tp, fp, fn, tn };
-  }
+  const counts = thr => confusionFromScores(ex, thr);
   function draw() {
     const { ctx, w, h } = fitCanvas(cv);
     ctx.clearRect(0, 0, w, h);
@@ -879,10 +746,8 @@ function gauss(rng) {
     ctx.fillText('actual −   actual +', 0, 0); ctx.restore();
     ctx.textAlign = 'left';
 
-    const acc = (tp + tn) / ex.length;
-    const prec = tp + fp ? tp / (tp + fp) : 0;
-    const rec = tp + fn ? tp / (tp + fn) : 0;
-    const f1 = prec + rec ? 2 * prec * rec / (prec + rec) : 0;
+    const cm = { tp, fp, fn, tn };
+    const acc = cmAccuracy(cm), prec = cmPrecision(cm), rec = cmRecall(cm), f1 = cmF1(cm);
     setText('cm-cnt', `${tp} · ${fp} · ${fn} · ${tn}`);
     setText('cm-acc', acc.toFixed(3));
     setText('cm-prec', prec.toFixed(3));
@@ -913,15 +778,7 @@ function gauss(rng) {
     const fp = neg.filter(s => s >= thr).length, tn = neg.length - fp;
     return { tpr: tp / (tp + fn || 1), fpr: fp / (fp + tn || 1) };
   }
-  function rocCurve() {
-    const pts = [];
-    for (let t = 1.001; t >= -0.001; t -= 0.01) { const { tpr, fpr } = rates(t); pts.push({ fpr, tpr }); }
-    pts.sort((a, b) => a.fpr - b.fpr || a.tpr - b.tpr);
-    // trapezoidal AUC
-    let auc = 0;
-    for (let i = 1; i < pts.length; i++) auc += (pts[i].fpr - pts[i - 1].fpr) * (pts[i].tpr + pts[i - 1].tpr) / 2;
-    return { pts, auc };
-  }
+  const rocCurve = () => rocAuc(pos, neg); // ROC sweep + trapezoidal AUC from ./metrics.js
   function draw() {
     const { ctx, w, h } = fitCanvas(cv);
     ctx.clearRect(0, 0, w, h);

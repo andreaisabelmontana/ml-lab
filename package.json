@@ -1,0 +1,11 @@
+{
+  "name": "ml-lab",
+  "version": "1.0.0",
+  "description": "Framework-free machine-learning cores behind the ml-lab visual demos, unit-tested with node:test.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
