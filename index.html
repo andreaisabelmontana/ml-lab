@@ -27,6 +27,7 @@
       <nav>
         <a href="./course.html">course outline</a>
         <a href="./project.html">example project</a>
+        <a href="#builds">builds</a>
         <a href="#split">train/test</a>
         <a href="#gd">gradient descent</a>
         <a href="#bv">bias–variance</a>
@@ -269,6 +270,35 @@
             <div class="readout"><span>AUC</span><strong id="rc-auc" class="mono big">—</strong></div>
             <button id="rc-new" class="btn">new scores</button>
           </div>
+        </div>
+      </section>
+          <!-- RELATED INTERACTIVE BUILDS ----------------------------------- -->
+      <style>
+        .builds{position:relative;background:var(--paper);border:1px solid var(--rule);
+          border-radius:14px;padding:1.15rem 1.4rem 1.5rem;box-shadow:var(--shadow-sm);}
+        .builds>h2{font-family:var(--font-display);font-weight:600;font-size:1.32rem;
+          letter-spacing:-.01em;margin:0 0 .35rem;color:var(--ink);line-height:1.18;}
+        .builds>h2::before{content:'';display:inline-block;width:9px;height:9px;border-radius:3px;
+          background:linear-gradient(var(--accent),var(--gold));margin-right:.55em;transform:translateY(-2px);}
+        .build-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(244px,1fr));gap:.8rem;margin-top:1.05rem;}
+        a.build{display:flex;flex-direction:column;gap:.5rem;background:var(--bg);border:1px solid var(--rule);
+          border-radius:11px;padding:.9rem .95rem;transition:transform .15s,box-shadow .15s,border-color .15s;}
+        a.build:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--rule-h);}
+        a.build .bemoji{font-size:1.5rem;line-height:1;}
+        a.build .btext{display:flex;flex-direction:column;gap:.22rem;}
+        a.build .btext strong{font-family:var(--font-display);font-weight:600;font-size:1.04rem;color:var(--ink);}
+        a.build .btext small{color:var(--ink-soft);font-size:.82rem;line-height:1.45;}
+        a.build .bgo{margin-top:auto;font-family:var(--font-mono);font-size:.72rem;color:var(--accent);letter-spacing:.02em;}
+      </style>
+      <section class="builds" id="builds">
+        <h2>Related interactive builds</h2>
+        <p class="cap">A from-scratch machine-learning study that applies this course's methods end to end. Open the results showcase in the browser.</p>
+        <div class="build-grid">
+          <a class="build" href="https://andreaisabelmontana.github.io/bank-marketing-ml/" target="_blank" rel="noopener">
+            <span class="bemoji">🏦</span>
+            <span class="btext"><strong>Bank Marketing ML</strong><small>Predicting term-deposit subscriptions — EDA, three models, and a results showcase.</small></span>
+            <span class="bgo">open live demo →</span>
+          </a>
         </div>
       </section>
     </main>
