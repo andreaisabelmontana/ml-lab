@@ -4,6 +4,8 @@ Visual machine-learning foundations. 11 self-contained demos walking the core ML
 
 **Live:** https://andreaisabelmontana.github.io/ml-lab/
 
+**Coursework projects:** [nanograd](https://github.com/andreaisabelmontana/nanograd) · [efficient-classifier](https://andreaisabelmontana.github.io/efficient-classifier-rebuild/) · [heuristic-compiler](https://andreaisabelmontana.github.io/heuristic-compiler-rebuild/) · [bank-marketing-ml](https://andreaisabelmontana.github.io/bank-marketing-ml/)
+
 The pipeline & generalization
 1. Train/test split & overfitting — fit a polynomial, watch test RMSE climb as degree grows while train RMSE keeps falling
 2. Gradient descent — minimise MSE for linear regression step by step; large learning rates diverge
