@@ -1,9 +1,10 @@
 // ============================================================
-// ml-lab — 11 visual demos covering the foundational machine-learning
+// ml-lab — 12 visual demos covering the foundational machine-learning
 // pipeline and core algorithms taught in AI: Machine Learning Foundations
 // (IE BCSAI): train/test split & overfitting, gradient descent,
 // bias–variance, feature scaling, k-NN, logistic regression, decision
-// trees, k-means, PCA, confusion matrix, ROC/AUC.
+// trees, k-means, PCA, confusion matrix, ROC/AUC, and a neural network
+// (multi-layer perceptron) that learns a non-linear boundary.
 //
 // Every demo follows the same pattern as the rest of the *-lab series:
 //   1. read control state through helpers that always return finite values
@@ -46,6 +47,7 @@ import {
   rocAuc,
 } from './metrics.js';
 import { pca as pcaFit } from './pca.js';
+import { initMLP, forward, trainStep, mlpMetrics } from './mlp.js';
 
 // ---------- helpers ------------------------------------------------------
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -819,4 +821,68 @@ function ptr(cv, ev) {
   $('rc-new').addEventListener('click', () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; regen(); draw(); });
   window.addEventListener('resize', draw);
   regen(); draw();
+})();
+
+// ============================================================
+// 12. NEURAL NETWORK (MLP) — one hidden tanh layer learns a non-linear
+//     (XOR) boundary that the linear logistic model above cannot.
+// ============================================================
+(function neuralNet() {
+  const cv = $('cv-mlp'); if (!cv) return;
+  let seed = 11, data = [], net = null, ep = 0, raf = null;
+
+  // XOR-style data: classes occupy opposite quadrants, so no straight line
+  // separates them — the hidden layer is what makes it learnable.
+  function regen() {
+    const rng = mulberry32(seed);
+    data = [];
+    const blob = (cx, cy, t) => { for (let i = 0; i < 22; i++)
+      data.push({ x: clamp(cx + gauss(rng) * 0.07, 0.02, 0.98), y: clamp(cy + gauss(rng) * 0.07, 0.02, 0.98), t }); };
+    blob(0.27, 0.27, 0); blob(0.73, 0.27, 1); blob(0.27, 0.73, 1); blob(0.73, 0.73, 0);
+  }
+  function rebuild() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; setText('nn-play', 'play'); }
+    net = initMLP(Math.round(n('nn-h', 8)), seed); ep = 0;
+  }
+  function stepEpoch() { net = trainStep(net, data, n('nn-l', 60) / 100); ep++; }
+
+  function draw() {
+    const { ctx, w, h } = fitCanvas(cv);
+    ctx.clearRect(0, 0, w, h);
+    setText('nn-hv', Math.round(n('nn-h', 8)));
+    setText('nn-lv', (n('nn-l', 60) / 100).toFixed(2));
+    const S = Math.min(w, h) - 8, ox = (w - S) / 2, oy = 4;
+    const X = x => ox + x * S, Y = y => oy + (1 - y) * S;
+    // probability shading — the curved decision surface the network has learned
+    const step = 12;
+    for (let px = 0; px < S; px += step) for (let py = 0; py < S; py += step) {
+      const gx = px / S, gy = 1 - py / S;
+      const pr = forward(net, { x: gx, y: gy }).p;
+      const a = (0.20 * Math.abs(pr - 0.5) * 2).toFixed(3);
+      ctx.fillStyle = pr >= 0.5 ? `rgba(245,158,11,${a})` : `rgba(67,56,202,${a})`;
+      ctx.fillRect(ox + px, oy + py, step, step);
+    }
+    ctx.strokeStyle = RULE; ctx.strokeRect(ox, oy, S, S);
+    data.forEach(p => { ctx.fillStyle = p.t === 0 ? ACCENT : WARN; ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), 4, 0, 7); ctx.fill(); });
+
+    const { loss, acc } = mlpMetrics(net, data);
+    setText('nn-ep', ep);
+    setText('nn-loss', loss.toFixed(4));
+    setText('nn-acc', (100 * acc).toFixed(0) + '%');
+    $('nn-acc').style.color = acc > 0.9 ? GOOD : acc < 0.7 ? BAD : ACCENT;
+  }
+  function play() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; setText('nn-play', 'play'); return; }
+    setText('nn-play', 'pause');
+    const tick = () => { for (let i = 0; i < 3; i++) stepEpoch(); draw(); raf = requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick);
+  }
+  $('nn-play').addEventListener('click', play);
+  $('nn-step').addEventListener('click', () => { stepEpoch(); draw(); });
+  $('nn-reset').addEventListener('click', () => { rebuild(); draw(); });
+  $('nn-h').addEventListener('input', () => { rebuild(); draw(); });
+  $('nn-l').addEventListener('input', draw);
+  $('nn-new').addEventListener('click', () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; regen(); rebuild(); draw(); });
+  window.addEventListener('resize', draw);
+  regen(); rebuild(); draw();
 })();

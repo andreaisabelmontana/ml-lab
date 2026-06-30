@@ -40,6 +40,7 @@
         <a href="#pca">PCA</a>
         <a href="#cm">confusion</a>
         <a href="#roc">ROC/AUC</a>
+        <a href="#mlp">neural net</a>
       </nav>
     </header>
 
@@ -273,6 +274,34 @@
           </div>
         </div>
       </section>
+
+      <!-- 12. NEURAL NETWORK (MLP) ------------------------------------ -->
+      <section class="demo" id="mlp">
+        <h2>12. Neural network — a multi-layer perceptron</h2>
+        <p class="cap">The logistic model above can only draw a <em>straight</em> boundary. This data is laid
+          out as XOR — class 1 in two opposite quadrants — so no line separates it. Add one hidden layer of
+          $\tanh$ units and the network composes them into a curved boundary: each hidden unit computes
+          $a_j=\tanh(w_j^\top x + b_j)$, and the output is $\hat p=\sigma\!\big(\sum_j v_j a_j + c\big)$,
+          trained by back-propagating cross-entropy. Press play and watch the four quadrants get carved out.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-mlp" width="600" height="340"></canvas></div>
+          <div class="ctrls">
+            <label>hidden units <span class="mono" id="nn-hv">8</span>
+              <input id="nn-h" type="range" min="2" max="12" step="1" value="8"/></label>
+            <label>learning rate $\eta$ <span class="mono" id="nn-lv">0.60</span>
+              <input id="nn-l" type="range" min="5" max="150" step="5" value="60"/></label>
+            <div class="readout"><span>epoch</span><strong id="nn-ep" class="mono">0</strong></div>
+            <div class="readout"><span>cross-entropy</span><strong id="nn-loss" class="mono big">—</strong></div>
+            <div class="readout"><span>train accuracy</span><strong id="nn-acc" class="mono">—</strong></div>
+            <button id="nn-play" class="btn">play</button>
+            <button id="nn-step" class="btn">step</button>
+            <button id="nn-reset" class="btn">reset</button>
+            <button id="nn-new" class="btn">new data</button>
+            <p class="hint">Drop hidden units to 2 and it under-fits — too few units can't bend the boundary enough.</p>
+          </div>
+        </div>
+      </section>
+
           <!-- RELATED INTERACTIVE BUILDS ----------------------------------- -->
       <style>
         .builds{position:relative;background:var(--paper);border:1px solid var(--rule);

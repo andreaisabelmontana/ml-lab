@@ -835,8 +835,11 @@
                   <span class="desc">A neuron is a weighted sum passed through a non-linearity; backprop applies the chain rule to get $\partial L/\partial w$.</span></span>
               </div>
               <p class="keyidea"><b>Key idea:</b> depth + non-linear activations let networks compose simple functions into rich ones; backprop makes training them tractable.</p>
-              <div class="tags"><a class="tag demo" href="./index.html#gd">gradient descent demo ↗</a></div>
-              <p class="tag-note"><b>Demo:</b> gradient descent is exactly the optimiser that trains these networks, one weight update at a time.</p>
+              <div class="tags">
+                <a class="tag demo" href="./index.html#mlp">neural network demo ↗</a>
+                <a class="tag demo" href="./index.html#gd">gradient descent demo ↗</a>
+              </div>
+              <p class="tag-note"><b>Demos:</b> the multi-layer perceptron learns a non-linear (XOR) boundary a single neuron cannot; gradient descent is exactly the optimiser that trains it, one weight update at a time.</p>
             </div>
 
             <div class="sess">
@@ -873,8 +876,11 @@
                   <span class="desc">The default hidden activation — cheap, non-saturating, and the reason deep nets train well.</span></span>
               </div>
               <p class="keyidea"><b>Key idea:</b> a "gradient tape" records operations so the framework can autodiff the loss — you specify the forward pass, it gives you the gradients.</p>
-              <div class="tags"><span class="tag assign">Assignment (70 pts)</span></div>
-              <p class="tag-note"><b>Assignment (70 pts):</b> implement and train a neural network in a notebook (tensors, optimizer, activations) and analyse the results.</p>
+              <div class="tags">
+                <span class="tag assign">Assignment (70 pts)</span>
+                <a class="tag demo" href="./index.html#mlp">neural network demo ↗</a>
+              </div>
+              <p class="tag-note"><b>Assignment (70 pts):</b> implement and train a neural network in a notebook (tensors, optimizer, activations) and analyse the results. <b>Demo:</b> the in-browser MLP shows the same forward/backward loop on an XOR task.</p>
             </div>
 
             <div class="sess">
