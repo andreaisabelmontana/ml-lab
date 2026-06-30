@@ -41,6 +41,7 @@
         <a href="#cm">confusion</a>
         <a href="#roc">ROC/AUC</a>
         <a href="#mlp">neural net</a>
+        <a href="#cv">cross-val</a>
       </nav>
     </header>
 
@@ -298,6 +299,31 @@
             <button id="nn-reset" class="btn">reset</button>
             <button id="nn-new" class="btn">new data</button>
             <p class="hint">Drop hidden units to 2 and it under-fits — too few units can't bend the boundary enough.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13. K-FOLD CROSS-VALIDATION --------------------------------- -->
+      <section class="demo" id="cv">
+        <h2>13. k-fold cross-validation</h2>
+        <p class="cap">A single train/test split is a noisy, optimistic estimate of generalization — it depends on
+          which points happened to land in the test set. $k$-fold cross-validation splits the data into $k$ folds,
+          uses each fold once as the validation set while the other $k-1$ train the model, and averages the $k$
+          validation errors: $\text{CV} = \frac{1}{k}\sum_{i=1}^{k}\text{RMSE}_i$. Step through the folds (amber rings
+          mark the held-out fold) and watch the per-fold bars vary while their mean — the dashed red CV line — stays
+          stable. Push the degree up to see cross-validation expose overfitting.</p>
+        <div class="row">
+          <div class="canvas-wrap"><canvas id="cv-kf" width="600" height="360"></canvas></div>
+          <div class="ctrls">
+            <label>polynomial degree <span class="mono" id="kf-dv">4</span>
+              <input id="kf-d" type="range" min="1" max="12" step="1" value="4"/></label>
+            <label>folds $k$ <span class="mono" id="kf-kv">5</span>
+              <input id="kf-k" type="range" min="3" max="10" step="1" value="5"/></label>
+            <div class="readout"><span>current fold</span><strong id="kf-fold" class="mono">—</strong></div>
+            <div class="readout"><span>this fold's RMSE</span><strong id="kf-foldrmse" class="mono">—</strong></div>
+            <div class="readout"><span>CV RMSE (mean ± sd)</span><strong id="kf-cv" class="mono big">—</strong></div>
+            <button id="kf-next" class="btn">next fold</button>
+            <button id="kf-new" class="btn">new sample</button>
           </div>
         </div>
       </section>

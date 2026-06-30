@@ -1,10 +1,10 @@
 // ============================================================
-// ml-lab — 12 visual demos covering the foundational machine-learning
+// ml-lab — 13 visual demos covering the foundational machine-learning
 // pipeline and core algorithms taught in AI: Machine Learning Foundations
 // (IE BCSAI): train/test split & overfitting, gradient descent,
 // bias–variance, feature scaling, k-NN, logistic regression, decision
-// trees, k-means, PCA, confusion matrix, ROC/AUC, and a neural network
-// (multi-layer perceptron) that learns a non-linear boundary.
+// trees, k-means, PCA, confusion matrix, ROC/AUC, a neural network
+// (multi-layer perceptron), and k-fold cross-validation.
 //
 // Every demo follows the same pattern as the rest of the *-lab series:
 //   1. read control state through helpers that always return finite values
@@ -48,6 +48,7 @@ import {
 } from './metrics.js';
 import { pca as pcaFit } from './pca.js';
 import { initMLP, forward, trainStep, mlpMetrics } from './mlp.js';
+import { crossValidate } from './kfold.js';
 
 // ---------- helpers ------------------------------------------------------
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -885,4 +886,79 @@ function ptr(cv, ev) {
   $('nn-new').addEventListener('click', () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; regen(); rebuild(); draw(); });
   window.addEventListener('resize', draw);
   regen(); rebuild(); draw();
+})();
+
+// ============================================================
+// 13. K-FOLD CROSS-VALIDATION — rotate which fold is held out, average the
+//     validation errors (Model Evaluation, session 13). A lower-variance,
+//     less optimistic estimate of generalization than one train/test split.
+// ============================================================
+(function crossVal() {
+  const cv = $('cv-kf'); if (!cv) return;
+  let seed = 5, pts = [], foldI = 0;
+  const truth = x => Math.sin(2 * Math.PI * x) * 0.6 + 0.05;
+  function regen() {
+    const rng = mulberry32(seed);
+    pts = [];
+    for (let i = 0; i < 30; i++) { const x = rng(); pts.push({ x, y: truth(x) + gauss(rng) * 0.22 }); }
+    foldI = 0;
+  }
+  function draw() {
+    const { ctx, w, h } = fitCanvas(cv);
+    ctx.clearRect(0, 0, w, h);
+    const deg = Math.round(n('kf-d', 4)), k = Math.round(n('kf-k', 5));
+    setText('kf-dv', deg); setText('kf-kv', k);
+    if (!pts.length) regen();
+    const out = crossValidate(pts, { degree: deg, k, seed });
+    foldI = ((foldI % out.k) + out.k) % out.k;
+    const sel = out.results[foldI];
+    const valSet = new Set(sel.valIdx);
+
+    // plot frame (top region)
+    const pad = 38, x0 = pad, x1 = w - 14, y0 = 14, y1 = h - 116;
+    const X = x => x0 + x * (x1 - x0);
+    const Y = y => y1 - (y + 1.3) / 2.6 * (y1 - y0);
+    ctx.strokeStyle = RULE; ctx.lineWidth = 1; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+
+    // fitted curve on the training folds
+    ctx.strokeStyle = ACCENT; ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 220; i++) { const x = i / 220, y = clamp(evalPoly(sel.coef, x), -1.3, 1.3); const px = X(x), py = Y(y); i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py); }
+    ctx.stroke();
+    // points: training (filled) vs the held-out validation fold (amber rings)
+    pts.forEach((p, i) => {
+      const px = X(p.x), py = Y(clamp(p.y, -1.3, 1.3));
+      if (valSet.has(i)) { ctx.strokeStyle = WARN; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(px, py, 4.5, 0, 7); ctx.stroke(); }
+      else { ctx.fillStyle = 'rgba(67,56,202,0.55)'; ctx.beginPath(); ctx.arc(px, py, 3, 0, 7); ctx.fill(); }
+    });
+    ctx.fillStyle = MUTED; ctx.font = '11px Inter';
+    ctx.fillText(`● train   ○ validation (fold ${foldI + 1})`, x0 + 6, y0 + 14);
+
+    // per-fold validation-RMSE bars (bottom region) with the CV mean line
+    const errs = out.results.map(r => r.rmse), emax = Math.max(...errs, 0.05);
+    const bx0 = pad, bw = (x1 - x0) / out.k, by1 = h - 26, bh = 64, by0 = by1 - bh;
+    ctx.strokeStyle = RULE; ctx.beginPath(); ctx.moveTo(bx0, by1); ctx.lineTo(x1, by1); ctx.stroke();
+    errs.forEach((e, i) => {
+      const x = bx0 + i * bw + bw * 0.18, bwid = bw * 0.64, hgt = e / emax * bh;
+      ctx.fillStyle = i === foldI ? WARN : ACCENT_S;
+      ctx.fillRect(x, by1 - hgt, bwid, hgt);
+      ctx.strokeStyle = i === foldI ? WARN : ACCENT; ctx.lineWidth = 1; ctx.strokeRect(x, by1 - hgt, bwid, hgt);
+    });
+    const my = by1 - out.mean / emax * bh;
+    ctx.strokeStyle = BAD; ctx.lineWidth = 1.6; ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(bx0, my); ctx.lineTo(x1, my); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = BAD; ctx.font = '10px Inter'; ctx.textAlign = 'right';
+    ctx.fillText('CV mean', x1 - 2, my - 3); ctx.textAlign = 'left';
+    ctx.fillStyle = MUTED; ctx.fillText('per-fold validation RMSE', bx0, by0 - 4);
+
+    setText('kf-fold', `${foldI + 1} / ${out.k}`);
+    setText('kf-foldrmse', sel.rmse.toFixed(3));
+    setText('kf-cv', `${out.mean.toFixed(3)} ± ${out.std.toFixed(3)}`);
+    $('kf-cv').style.color = out.mean < 0.3 ? GOOD : out.mean > 0.55 ? BAD : ACCENT;
+  }
+  $('kf-d').addEventListener('input', draw);
+  $('kf-k').addEventListener('input', () => { foldI = 0; draw(); });
+  $('kf-next').addEventListener('click', () => { foldI++; draw(); });
+  $('kf-new').addEventListener('click', () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; regen(); draw(); });
+  window.addEventListener('resize', draw);
+  regen(); draw();
 })();
